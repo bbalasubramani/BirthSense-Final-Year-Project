@@ -1,7 +1,7 @@
 # BirthSense – Analytical Prediction of Obstetric Delivery Methods
 
 ## 📌 Project Overview
-BirthSense is a web-based clinical decision support system designed to predict the mode of childbirth (Vaginal or Cesarean) using Machine Learning techniques. The system assists healthcare professionals by providing data-driven predictions to reduce unnecessary C-sections and improve maternal and neonatal outcomes.
+BirthSense is a web-based clinical decision support system designed to predict the mode of childbirth (Vaginal,Cesarean or Assisted) using Machine Learning techniques. The system assists healthcare professionals by providing data-driven predictions to reduce unnecessary C-sections and improve maternal and neonatal outcomes.
 
 ## 🎯 Objectives
 - Predict childbirth mode using patient clinical and obstetric data
