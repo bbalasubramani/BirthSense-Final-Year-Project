@@ -64,18 +64,6 @@ Open `frontend/index.html` in a browser.
 
 ---
 
-## ✅ PART 7: Connect Local Project to GitHub
-
-Copy commands from GitHub page and run in VS Code terminal:
-
-```bash
-git add .
-git commit -m "Initial commit - Final Year Project BirthSense"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/BirthSense-Final-Year-Project.git
-git push -u origin main
-```
-
 ## 📊 Results
 - High prediction accuracy using Random Forest
 - Fast response time
