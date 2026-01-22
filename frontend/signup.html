@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up</title>
+    <style>
+        body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+    overflow: hidden; 
+}
+
+
+body::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: linear-gradient(to bottom, rgba(160, 216, 239, 0.7), rgba(255, 255, 255, 0.7)), url('static/images/back_image.jpg');
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px);
+    z-index: -1;
+}
+
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            width: 300px; /* smaller container */
+            color: #000;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #004d66;
+            font-size: 20px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 6px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.25);
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+
+        label {
+            font-size: 13px;
+            margin-top: 10px;
+            display: block;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 12px;
+            background-color: #4CAF50;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn-submit{
+            background-color: #3f55e5;
+            border-radius: 50px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api'; 
+
+        async function handleSignup(event) {
+            event.preventDefault(); 
+            const name = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirm_password").value;
+            const role = document.getElementById("role").value;
+            const errorElement = document.getElementById('signup-error');
+
+            errorElement.textContent = ''; 
+
+            if (password !== confirmPassword) {
+                errorElement.textContent = "Passwords do not match.";
+                return;
+            }
+            if (!role) {
+                errorElement.textContent = "Please select a role.";
+                return;
+            }
+            
+           
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, role })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Signup successful, redirect to login
+                    alert('Signup successful! You can now log in.'); // Use modal later
+                    window.location.href = 'login.html';
+                } else {
+                    errorElement.textContent = data.message || 'Signup failed.';
+                }
+
+            } catch (error) {
+                console.error('Signup error:', error);
+                errorElement.textContent = 'Network error or server unreachable.';
+            }
+        }
+    </script>
+</head>
+<body>
+    <form class="container" onsubmit="handleSignup(event)">
+        <h1>Sign Up</h1>
+        <label for="username">Name</label>
+        <input type="text" id="username" placeholder="Enter your full name" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter email" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password" required>
+
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" id="confirm_password" placeholder="Re-enter password" required>
+
+        <label for="role">Role</label>
+        <select id="role" required>
+            <option value="">Select role</option>
+            <option value="doctor">Doctor</option>
+            <option value="nurse">Nurse</option>
+            <option value="admin">Admin</option>
+            <option value="data_entry">Data Entry</option>
+            </select>
+
+        
+
+        <p id="signup-error" class="error-message"></p>
+        <button type="submit" class="btn-submit">Register</button>
+        <p style="text-align: center; font-size: 0.9em; margin-top: 15px;">
+            Already have an account? <a href="login.html" style="color: #3f55e5; font-weight: bold;">Login</a>
+        </p>
+    </form>
+</body>
+</html>

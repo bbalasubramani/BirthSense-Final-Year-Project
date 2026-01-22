@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BirthSense - Data Entry</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Pangolin&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Define common color variables */
+        :root {
+            --bg-color: #f7f9fc;
+            --sidebar-bg: #c7d9ef;
+            --text-color-primary: #1e2023;
+            --text-color-light: #ffffff;
+            --primary-color: #3f55e5;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+            --border-color: #e9ecef;
+            --input-border: #ccc;
+        }
+
+        /* Base Styles for Dashboard Layout */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color-primary);
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            color: var(--text-color-light);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-title {
+            font-family: "Poppins", sans-serif;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav li a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .sidebar-nav li a:hover,
+        .sidebar-nav li a.active {
+            background-color: var(--primary-color);
+            color: var(--text-color-light);
+        }
+
+        #logoutBtn {
+            background-color: var(--danger-color) !important;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #logoutBtn:hover {
+            background-color: #c82333 !important;
+            /* Darker red */
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+        }
+
+        .main-header {
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-header h1 {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .content-section {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .content-section h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* ======================================================= */
+        /* ✅ Form Grid Fix for Alignment */
+        /* ======================================================= */
+        .form-grid {
+            display: grid;
+            /* Create 3 columns for better use of space, min 300px wide */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            align-items: start;
+            /* Align items to the top of their grid area */
+        }
+
+        .form-grid>div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-grid label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-color-primary);
+        }
+
+        .form-grid input[type="text"],
+        .form-grid input[type="number"],
+        .form-grid select {
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+            /* Ensure inputs fill their grid cell */
+            box-sizing: border-box;
+        }
+
+        .form-grid input:focus,
+        .form-grid select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(63, 85, 229, 0.2);
+            outline: none;
+        }
+
+        /* Warning and Validation Styles (FIX 1: margin-top changed from 5px to 2px) */
+        .warning,
+        .warning-message {
+            color: var(--danger-color);
+            font-size: 0.95em;
+            margin-top: 2px;
+            display: block;
+        }
+
+        input:invalid {
+            border-color: var(--danger-color);
+        }
+
+        /* Submit Button Alignment */
+        .submit-button-container {
+            text-align: right;
+            margin-top: 30px;
+            padding-right: 40px;
+        }
+
+        #submitDataBtn {
+            /* FIX 3a: Change padding to match old style */
+            padding: 15px;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            /* FIX 3b: Added margin-bottom to match old style */
+            margin-bottom: 20px;
+        }
+
+        #submitDataBtn:hover {
+            /* FIX 2: Change background-color to match old style */
+            background-color: greenyellow;
+            transform: translateY(-2px);
+        }
+
+        #submitDataBtn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Disapproved List Styles */
+        .disapproved-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .disapproved-item {
+            background-color: #ffe0e0;
+            border: 1px solid var(--danger-color);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .disapproved-item-info {
+            flex-grow: 1;
+        }
+
+        .disapproved-item button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+
+        .disapproved-item-reason {
+            color: var(--danger-color);
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        /* FIX 4: Added explicit rule for hiding sections */
+        .hide-on-edit-list {
+            display: none;
+        }
+
+        /* Media Query for smaller screens */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                padding: 15px 0;
+            }
+
+            .sidebar-nav ul {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .sidebar-nav li a {
+                padding: 8px 15px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .submit-button-container {
+                text-align: center;
+                padding-right: 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">BirthSense</h2>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" class="nav-item" data-target="disapprovedList">Disapproved for Edit</a></li>
+
+                    <li><a href="#" class="nav-item active" data-target="patientIdentity">Patient Identity</a></li>
+                    <li><a href="#" class="nav-item" data-target="basicInfo">Basic Maternal Info</a></li>
+                    <li><a href="#" class="nav-item" data-target="obstetricHistory">Obstetric History</a></li>
+                    <li><a href="#" class="nav-item" data-target="currentPregnancy">Current Pregnancy Details</a></li>
+                    <li><a href="#" class="nav-item" data-target="laborDelivery">Labor & Delivery Info</a></li>
+                </ul>
+            </nav>
+            <div style="margin-top: auto; padding: 20px;">
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1 id="mainHeaderTitle">BirthSense - Data Entry</h1>
+                <div id="statusMessage" style="color: var(--success-color); font-weight: bold;"></div>
+            </header>
+
+            <div id="disapprovedList" class="content-section" style="display:none;">
+                <h2>Disapproved Patient Data</h2>
+                <p>Select a record below to review the nurse's comments, edit the data, and resubmit.</p>
+                <ul class="disapproved-list" id="disapprovedDataList">
+                    <li>No disapproved records found.</li>
+                </ul>
+                <div id="loadingDisapproved" style="text-align: center; margin-top: 20px;">Loading...</div>
+            </div>
+            <div id="patientIdentity" class="content-section">
+                <h2>Patient Identity</h2>
+                <div class="form-grid">
+                    <div>
+                        <label for="patientId">Patient ID</label>
+                        <input type="text" id="patientId" required>
+                    </div>
+                    <div>
+                        <label for="patientName">Patient Name</label>
+                        <input type="text" id="patientName" required>
+                    </div>
+                    <div>
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div>
+                        <label for="phone_number">Phone Number</label>
+                        <input type="tel" id="phone_number" required>
+                    </div>
+                    <input type="hidden" id="mongoIdToEdit">
+                </div>
+            </div>
+
+            <div id="basicInfo" class="content-section hide-on-edit-list">
+                <h2>Basic Maternal Info</h2>
+                <div class="form-grid">
+                    <div>
+                        <label for="age">Maternal Age</label>
+                        <input type="number" id="age" min="15" max="50" required>
+                        <span class="warning" id="warn_age"></span>
+                    </div>
+                    <div>
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" min="100" max="250" oninput="calculateBMI()" required>
+                        <span class="warning" id="warn_height"></span>
+                    </div>
+                    <div>
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" min="30" max="200" oninput="calculateBMI()" required>
+                        <span class="warning" id="warn_weight"></span>
+                    </div>
+                    <div>
+                        <label for="bmi">BMI</label>
+                        <input type="number" id="bmi" readonly required>
+                        <span class="warning" id="warn_bmi"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="obstetricHistory" class="content-section hide-on-edit-list">
+                <h2>Obstetric History</h2>
+                <div class="form-grid">
+                    <div>
+                        <label for="gravidity">Gravidity</label>
+                        <input type="number" id="gravidity" min="0" max="20" required>
+                        <span class="warning" id="warn_gravidity"></span>
+                    </div>
+                    <div>
+                        <label for="parity">Parity</label>
+                        <input type="number" id="parity" min="0" max="15" required>
+                        <span class="warning" id="warn_parity"></span>
+                    </div>
+                    <div>
+                        <label for="previous_cesarean">Previous Cesarean</label>
+                        <select id="previous_cesarean" required>
+                            <option value="">Select</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                        <span class="warning" id="warn_previous_cesarean"></span>
+                    </div>
+                    <div>
+                        <label for="previous_vaginal_birth">Previous Vaginal Birth</label>
+                        <select id="previous_vaginal_birth" required>
+                            <option value="">Select</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                        <span class="warning" id="warn_previous_vaginal_birth"></span>
+                    </div>
+                    <div>
+                        <label for="previous_assisted">Previous Assisted Birth</label>
+                        <select id="previous_assisted" required>
+                            <option value="">Select</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                        <span class="warning" id="warn_previous_assisted"></span>
+                    </div>
+                    <div>
+                        <label for="prior_shoulder_dystocia">Prior Shoulder Dystocia</label>
+                        <select id="prior_shoulder_dystocia" required>
+                            <option value="">Select</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                        <span class="warning" id="warn_prior_shoulder_dystocia"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="currentPregnancy" class="content-section hide-on-edit-list">
+                <h2>Current Pregnancy Details</h2>
+                <div class="form-grid">
+                    <div>
+                        <label for="gestational_age">Gestational Age (weeks)</label>
+                        <input type="number" id="gestational_age" min="20" max="42" required>
+                        <span class="warning" id="warn_gestational_age"></span>
+                    </div>
+                    <div>
+                        <label for="gestational_diabetes">Gestational Diabetes</label>
+                        <select id="gestational_diabetes" required>
+                            <option value="">Select</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                        <span class="warning" id="warn_gestational_diabetes"></span>
+                    </div>
+                    <div>
+                        <label for="hypertension">Hypertension/Preeclampsia</label>
+                        <select id="hypertension" required>
+                            <option value="">Select</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                        <span class="warning" id="warn_hypertension"></span>
+                    </div>
+                    <div>
+                        <label for="fetal_presentation">Fetal Presentation</label>
+                        <select id="fetal_presentation" required>
+                            <option value="">Select...</option>
+                            <option value="Cephalic">Cephalic (Head Down)</option>
+                            <option value="Breech">Breech (Bottom First)</option>
+                            <option value="Transverse">Transverse (Sideways)</option>
+                            <option value="Other">Other/Undetermined</option>
+                        </select>
+                        <span id="fetal_presentation-warning" class="warning-message"></span>
+                    </div>
+                    <div>
+                        <label for="estimated_fetal_weight">Estimated Fetal Weight (g)</label>
+                        <input type="number" id="estimated_fetal_weight" min="1000" max="5000" required>
+                        <span class="warning" id="warn_estimated_fetal_weight"></span>
+                    </div>
+                    <div>
+                        <label for="amniotic_fluid_index">Amniotic Fluid Index (AFI)</label>
+                        <input type="number" id="amniotic_fluid_index" min="5" max="25" required>
+                        <span class="warning" id="warn_amniotic_fluid_index"></span>
+                    </div>
+                    <div>
+                        <label for="placenta_location">Placenta Location</label>
+                        <select id="placenta_location" required>
+                            <option value="">Select...</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Previa">Previa (Low Lying)</option>
+                        </select>
+                        <span class="warning" id="warn_placenta_location"></span>
+                    </div>
+                    <div>
+                        <label for="fetal_heart_rate_category">Fetal Heart Rate Category</label>
+                        <select id="fetal_heart_rate_category" required>
+                            <option value="">Select...</option>
+                            <option value="I">Category I (Reassuring)</option>
+                            <option value="II">Category II (Indeterminate)</option>
+                            <option value="III">Category III (Abnormal)</option>
+                        </select>
+                        <span class="warning" id="warn_fetal_heart_rate_category"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="laborDelivery" class="content-section hide-on-edit-list">
+                <h2>Maternity Information</h2>
+                <div class="form-grid">
+                    <div>
+                        <label for="induction_of_labor">Induction of Labor Planned?</label>
+                        <select id="induction_of_labor" required>
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        <span id="induction_of_labor-warning" class="warning-message"></span>
+                    </div>
+                    <div>
+                        <label for="oxytocin_augmentation">Oxytocin Augmentation Used?</label>
+                        <select id="oxytocin_augmentation" required>
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        <span id="oxytocin_augmentation-warning" class="warning-message"></span>
+                    </div>
+                    <div>
+                        <label for="bp_systolic">Blood Pressure (Systolic)</label>
+                        <input type="number" id="bp_systolic" min="90" max="160" required>
+                        <span class="warning" id="warn_bp_systolic"></span>
+                    </div>
+                    <div>
+                        <label for="bp_diastolic">Blood Pressure (Diastolic)</label>
+                        <input type="number" id="bp_diastolic" min="60" max="100" required>
+                        <span class="warning" id="warn_bp_diastolic"></span>
+                    </div>
+                    <div>
+                        <label for="glucoseLevel">Glucose Level (mg/dL)</label>
+                        <input type="number" id="glucoseLevel" min="50" max="400" required>
+                        <span class="warning" id="warn_glucoseLevel"></span>
+                    </div>
+                    <div>
+                        <label for="bishop_score">Bishop Score</label>
+                        <input type="number" id="bishop_score" min="0" max="13" required>
+                        <span class="warning" id="warn_bishop_score"></span>
+                    </div>
+                    <div>
+                        <label for="cervical_dilation">Cervical Dilation (cm)</label>
+                        <input type="number" id="cervical_dilation" min="0" max="10" required>
+                        <span class="warning" id="warn_cervical_dilation"></span>
+                    </div>
+                    <div>
+                        <label for="fetal_station">Fetal Station (-5 to +5)</label>
+                        <input type="number" id="fetal_station" min="-5" max="5" required>
+                        <span class="warning" id="warn_fetal_station"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-button-container">
+                <button type="submit" id="submitDataBtn">Submit Patient Data</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // --- Constants ---
+        const ALL_INPUT_FIELDS = [
+            'patientId', 'patientName', 'email', 'phone_number',
+            'age', 'height', 'weight', 'bmi',
+            'gravidity', 'parity', 'previous_cesarean', 'previous_vaginal_birth', 'previous_assisted',
+            'prior_shoulder_dystocia',
+            'gestational_age', 'gestational_diabetes', 'hypertension', 'fetal_presentation',
+            'estimated_fetal_weight', 'amniotic_fluid_index', 'placenta_location', 'fetal_heart_rate_category',
+            'induction_of_labor', 'oxytocin_augmentation', 'bp_systolic', 'bp_diastolic',
+            'glucoseLevel', 'bishop_score', 'cervical_dilation', 'fetal_station'
+        ];
+
+        // --- State ---
+        let isEditMode = false;
+        let allDisapprovedData = [];
+
+        // --- API Helper ---
+        async function apiCall(url, method = 'GET', data = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(url, options);
+                const contentType = response.headers.get('content-type');
+
+                if (!response.ok) {
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'API call failed');
+                    } else {
+                        throw new Error(`API call failed with status ${response.status}`);
+                    }
+                }
+
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Expected JSON response but got: ' + contentType);
+                }
+            } catch (error) {
+                console.error('API Call Error:', error);
+                throw error;
+            }
+        }
+
+        function setWarning(id, value, min, max) {
+            const warn = document.getElementById('warn_' + id);
+            if (!warn) return false;
+
+            if (value === '' || value === null || isNaN(value)) {
+                warn.textContent = '';
+                return false;
+            }
+            if (value < min || value > max) {
+                warn.textContent = `Value must be between ${min} and ${max}`;
+                return true;
+            } else {
+                warn.textContent = '';
+                return false;
+            }
+        }
+
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const bmiInput = document.getElementById('bmi');
+            if (height > 0 && weight > 0) {
+                const bmi = weight / ((height / 100) ** 2);
+                bmiInput.value = bmi.toFixed(2);
+                setWarning('bmi', bmi, 10, 60);
+            } else {
+                bmiInput.value = '';
+                document.getElementById('warn_bmi').textContent = '';
+            }
+        }
+
+        const limits = {
+            age: [15, 50], height: [100, 250], weight: [30, 200], gravidity: [0, 20], parity: [0, 15],
+            gestational_age: [20, 42], estimated_fetal_weight: [1000, 5000], amniotic_fluid_index: [5, 25],
+            bp_systolic: [90, 160], bp_diastolic: [60, 100], glucoseLevel: [50, 400], bishop_score: [0, 13]
+        };
+
+        Object.keys(limits).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', function () {
+                    setWarning(id, parseFloat(this.value), limits[id][0], limits[id][1]);
+                });
+            }
+        });
+
+        function getValue(id, type) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            if (el.tagName === 'SELECT') return el.value || null;
+            if (type === 'int') return parseInt(el.value) || null;
+            if (type === 'float') return parseFloat(el.value) || null;
+            return el.value || null;
+        }
+
+        // --- Disapproved Data Handling ---
+        async function loadDisapprovedData() {
+            const listEl = document.getElementById('disapprovedDataList');
+            const loadingEl = document.getElementById('loadingDisapproved');
+            loadingEl.style.display = 'block';
+            listEl.innerHTML = '';
+
+            try {
+                const data = await apiCall('/api/data/patients');
+                allDisapprovedData = data.filter(p => p.reviewStatus === 'DISAPPROVED');
+                loadingEl.style.display = 'none';
+
+                if (allDisapprovedData.length === 0) {
+                    listEl.innerHTML = '<li>No disapproved records found.</li>';
+                    return;
+                }
+
+                listEl.innerHTML = allDisapprovedData.map(p => `
+        <li class="disapproved-item">
+            <div class="disapproved-item-info">
+                <strong>${p.patientName} (${p.patientId})</strong>
+                <div class="disapproved-item-reason">Reason: ${p.reviewNote || 'No reason provided.'}</div>
+            </div>
+            <button onclick="loadPatientForEdit('${p._id}')">Edit & Resubmit</button>
+        </li>
+        `).join('');
+
+            } catch (error) {
+                loadingEl.style.display = 'none';
+                listEl.innerHTML = `<li>Error loading data: ${error.message}</li>`;
+            }
+        }
+
+        function loadPatientForEdit(mongoId) {
+            const patient = allDisapprovedData.find(p => p._id === mongoId);
+            if (!patient) return;
+
+            isEditMode = true;
+            document.getElementById('mongoIdToEdit').value = mongoId;
+            document.getElementById('patientId').setAttribute('readonly', 'true');
+            document.getElementById('mainHeaderTitle').textContent = `Editing Patient: ${patient.patientName} (ID:
+        ${patient.patientId})`;
+
+            ALL_INPUT_FIELDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = patient[id] ?? '';
+            });
+
+            calculateBMI();
+            switchView('patientIdentity');
+        }
+
+        function switchView(targetId) {
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(nav => nav.classList.remove('active'));
+            // Hide all sections EXCEPT patientIdentity (we need those fields always accessible)
+            document.querySelectorAll('.content-section').forEach(section => {
+                // If target is disapprovedList, hide everything else
+                if (targetId === 'disapprovedList') {
+                    section.style.display = (section.id === 'disapprovedList') ? 'block' : 'none';
+                } else {
+                    // If target is a form section
+                    if (section.id === 'disapprovedList') {
+                        section.style.display = 'none';
+                    } else if (section.id === 'patientIdentity') {
+                        // Always show patient identity
+                        section.style.display = 'block';
+                    } else {
+                        // Show target section, hide others
+                        section.style.display = (section.id === targetId) ? 'block' : 'none';
+                    }
+                }
+            });
+
+            if (targetId === 'disapprovedList') {
+                isEditMode = false;
+                document.querySelector('.submit-button-container').style.display = 'none';
+                document.getElementById('mainHeaderTitle').textContent = 'BirthSense - Disapproved Records';
+                loadDisapprovedData();
+            } else {
+                document.querySelector('.submit-button-container').style.display = 'block';
+                document.querySelector(`.nav-item[data-target="${targetId}"]`).classList.add('active');
+                if (targetId !== 'patientIdentity') {
+                    document.getElementById('mainHeaderTitle').textContent = 'BirthSense - Data Entry';
+                }
+            }
+        }
+
+        // --- Submission Handler (Updated) ---
+        document.getElementById('submitDataBtn').addEventListener('click', async (event) => {
+            event.preventDefault();
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = 'Submitting...';
+            statusElement.style.color = 'orange';
+
+            const patientData = {};
+            let debugInfo = "Debug Data Collection:\n";
+
+            ALL_INPUT_FIELDS.forEach(id => {
+                const el = document.getElementById(id);
+                const val = el ? el.value : '';
+                patientData[id] = val;
+
+                if (id === 'email' || id === 'phone_number') {
+                    debugInfo += `${id}: '${val}' (Element found: ${!!el})\n`;
+                }
+            });
+
+            console.log('Collected patient data:', patientData);
+
+            const mongoId = document.getElementById('mongoIdToEdit').value;
+            const method = mongoId ? 'PUT' : 'POST';
+            const endpoint = mongoId ? `/api/data/patient/${mongoId}` : '/api/data/patient';
+
+            try {
+                const submitBtn = document.getElementById('submitDataBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+
+                const result = await apiCall(endpoint, method, patientData);
+
+                if (isEditMode) {
+                    statusElement.textContent = `✅ Patient ${result.patientId} successfully resubmitted for nurse review.`;
+                    statusElement.style.color = 'green';
+
+                    allDisapprovedData = allDisapprovedData.filter(p => p._id !== mongoId);
+                    const listEl = document.getElementById('disapprovedDataList');
+                    if (listEl) listEl.innerHTML = '<li>Refreshing...</li>';
+                    await loadDisapprovedData();
+
+                    isEditMode = false;
+                    document.getElementById('mongoIdToEdit').value = '';
+                    document.getElementById('patientId').removeAttribute('readonly');
+                    document.getElementById('mainHeaderTitle').textContent = 'BirthSense - Data Entry';
+                } else {
+                    statusElement.textContent = `✅ Patient ${result.patientId} added and pending nurse review.`;
+                    statusElement.style.color = 'green';
+                }
+
+                submitBtn.textContent = 'Redirecting...';
+                setTimeout(() => {
+                    window.location.href = 'nurse.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error(error);
+                statusElement.textContent = error.message || '❌ Data submission/update failed.';
+                statusElement.style.color = 'red';
+            } finally {
+                const submitBtn = document.getElementById('submitDataBtn');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Patient Data';
+            }
+        });
+
+        // --- Logout Handler ---
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            window.location.href = 'login.html';
+        });
+
+        // --- DOM Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            window.loadPatientForEdit = loadPatientForEdit;
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchView(item.getAttribute('data-target'));
+                });
+            });
+            switchView('patientIdentity');
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BirthSense - Doctor Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Pangolin&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .patient-table-container {
+            margin-top: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .patient-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .patient-table th,
+        .patient-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.9rem;
+        }
+
+        .patient-table th {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+        }
+
+        .view-btn {
+            background-color: #3f55e5;
+            color: white;
+        }
+
+        .predict-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .prediction-pending {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .prediction-done {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        /* Tab Styles */
+        .tab-buttons {
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-right: 10px;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .tab-button.active {
+            color: #3f55e5;
+            border-bottom-color: #3f55e5;
+        }
+
+        /* Ensure only one content section is visible at a time, besides the list/detail */
+        .content-section.active {
+            display: block !important;
+        }
+
+        .content-section:not(.active) {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <script>
+        if (window.location.protocol === 'file:') {
+            document.body.innerHTML = `
+                <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+                    <h1>⚠️ Configuration Error</h1>
+                    <p>It looks like you opened this file directly.</p>
+                    <p>Please use the running server to access this page:</p>
+                    <h2><a href="http://localhost:5000/doctor.html">http://localhost:5000/doctor.html</a></h2>
+                    <p>Ensure your backend server is running (npm start).</p>
+                </div>
+            `;
+            throw new Error("Stopped execution due to file protocol");
+        }
+    </script>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">BirthSense</h2>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" class="nav-item active" data-target="patientListContainer">Approved Data</a></li>
+                </ul>
+            </nav>
+            <div style="margin-top: auto; padding: 20px;">
+                <button id="logoutBtn"
+                    style="background-color: #dc3545; color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer;">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1>BirthSense - Doctor Dashboard</h1>
+                <p id="dashboard-info">Welcome, Doctor. View all **Approved** patient data and run predictions.</p>
+                <div id="statusMessage" style="color: green; font-weight: bold; margin-top: 10px;"></div>
+            </header>
+
+            <div id="patientListContainer" class="content-section active">
+
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-list="ready" onclick="switchListView('ready', this)">Ready
+                        for Prediction</button>
+                    <button class="tab-button" data-list="predicted"
+                        onclick="switchListView('predicted', this)">Predicted Patients</button>
+                </div>
+
+                <div id="readyList" class="patient-table-container active-list">
+                    <h2>List of Pending Predictions</h2>
+                    <table class="patient-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>BMI</th>
+                                <th>Submitted By</th>
+                                <th>Prediction Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="readyTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align: center;">Loading approved patient data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="predictedList" class="patient-table-container" style="display:none;">
+                    <h2>Prediction History</h2>
+                    <table class="patient-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Prediction Result</th>
+                                <th>Confidence</th>
+                                <th>Date Predicted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predictedTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align: center;">Loading predicted patient data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="patientDetailView" class="content-section">
+                <button id="backToListBtn" class="action-btn view-btn" style="margin-bottom: 20px;"><i
+                        class="fas fa-arrow-left"></i> Back to List</button>
+                <h2 id="patientDetailTitle">Patient: [Patient Name]</h2>
+                <input type="hidden" id="currentPatientId">
+                <input type="hidden" id="currentMongoId">
+                <form id="patientEditForm">
+                    <div id="basicInfo" class="content-section active">
+                        <h3>Basic Maternal Information</h3>
+                        <div class="form-grid">
+                            <div><label for="detail_patientId">Patient ID</label><input type="text"
+                                    id="detail_patientId" readonly></div>
+                            <div><label for="detail_patientName">Name</label><input type="text" id="detail_patientName">
+                            </div>
+                            <div><label for="detail_age">Maternal Age</label><input type="number" id="detail_age"></div>
+                            <div><label for="detail_height">Height (cm)</label><input type="number" id="detail_height"
+                                    oninput="calculateDetailBMI()"></div>
+                            <div><label for="detail_weight">Weight (kg)</label><input type="number" id="detail_weight"
+                                    oninput="calculateDetailBMI()"></div>
+                            <div><label for="detail_bmi">BMI</label><input type="number" id="detail_bmi" readonly></div>
+                            <div><label for="detail_bp_systolic">BP (Systolic)</label><input type="number"
+                                    id="detail_bp_systolic"></div>
+                            <div><label for="detail_glucoseLevel">Glucose Level (mmol/L)</label><input type="number"
+                                    id="detail_glucoseLevel"></div>
+                        </div>
+                    </div>
+
+                    <div id="obstetricInfo" style="margin-top: 20px;">
+                        <h3>Obstetric and Labor Details</h3>
+                        <div class="form-grid">
+                            <div>
+                                <label for="detail_fetal_presentation">Fetal Presentation</label>
+                                <select id="detail_fetal_presentation">
+                                    <option value="Cephalic">Cephalic (Head Down)</option>
+                                    <option value="Breech">Breech (Bottom First)</option>
+                                    <option value="Transverse">Transverse (Sideways)</option>
+                                    <option value="Other">Other/Undetermined</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="detail_induction_of_labor">Induction of Labor Planned?</label>
+                                <select id="detail_induction_of_labor">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="detail_oxytocin_augmentation">Oxytocin Augmentation Used?</label>
+                                <select id="detail_oxytocin_augmentation">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+
+                            <div><label for="detail_gravidity">Gravidity</label><input type="number"
+                                    id="detail_gravidity" min="0" required></div>
+                            <div><label for="detail_parity">Parity</label><input type="number" id="detail_parity"
+                                    min="0" required></div>
+                            <div><label for="detail_gestational_age">Gestational Age (Weeks)</label><input type="number"
+                                    id="detail_gestational_age" min="20" max="42" required></div>
+                            <div><label for="detail_estimated_fetal_weight">Est. Fetal Weight (g)</label><input
+                                    type="number" id="detail_estimated_fetal_weight" required></div>
+                            <div><label for="detail_amniotic_fluid_index">Amniotic Fluid Index</label><input
+                                    type="number" id="detail_amniotic_fluid_index" required></div>
+                            <div><label for="detail_bishop_score">Bishop Score</label><input type="number"
+                                    id="detail_bishop_score" min="0" max="13" required></div>
+                        </div>
+
+                        <h3 style="margin-top: 20px;">History of Complications</h3>
+                        <div class="form-grid">
+                            <div>
+                                <label for="detail_previous_cesarean">Previous Cesarean?</label>
+                                <select id="detail_previous_cesarean">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="detail_previous_vaginal_birth">Previous Vaginal Birth?</label>
+                                <select id="detail_previous_vaginal_birth">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="detail_previous_assisted">Previous Assisted?</label>
+                                <select id="detail_previous_assisted">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="detail_gestational_diabetes">Gestational Diabetes?</label>
+                                <select id="detail_gestational_diabetes">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="detail_hypertension">Hypertension/PE?</label>
+                                <select id="detail_hypertension">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="submit-button-container" style="margin-top: 30px;">
+                        <button type="button" id="updateDataBtn" class="action-btn view-btn"><i class="fas fa-save"></i>
+                            Update Record</button>
+                        <button type="button" id="predictDetailBtn" class="action-btn predict-btn"><i
+                                class="fas fa-brain"></i> Run Prediction</button>
+                        <button type="button" id="deleteDataBtn" class="action-btn"
+                            style="background-color: #dc3545;"><i class="fas fa-trash"></i> Delete (Admin Only)</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Expose functions globally for use in HTML onclick attributes
+        window.calculateDetailBMI = calculateDetailBMI;
+        window.showPatientDetails = showPatientDetails;
+        window.runPrediction = runPrediction;
+        window.switchListView = switchListView;
+
+        let allPatientsData = [];
+
+        async function verifySession() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/auth/me`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                if (!res.ok) throw new Error('Session invalid');
+                const user = await res.json();
+
+
+                // 🛑 Assuming 'doctor' role check here, update if your backend uses a different field
+                if (user.role !== 'doctor') {
+                    alert('Access denied. Doctors only.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                document.getElementById('dashboard-info').innerHTML = `Welcome, ${user.name} (Doctor). View all **Approved** patient data and run predictions.`;
+                fetchPatientData();
+            } catch (err) {
+                console.warn('Session check failed:', err);
+                const isNetworkError = err.message === 'Failed to fetch' || err.message.includes('NetworkError');
+
+                if (isNetworkError) {
+                    document.body.innerHTML = `
+                        <div style="text-align: center; padding: 50px; font-family: sans-serif;">
+                            <h1 style="color: red;">⚠️ Connection Error</h1>
+                            <p>Cannot connect to the server at <strong>${API_BASE_URL}</strong>.</p>
+                            <p>Please ensure:</p>
+                            <ul style="display: inline-block; text-align: left;">
+                                <li>The backend server is running (npm start)</li>
+                                <li>You are accessing this via http://localhost:5000</li>
+                            </ul>
+                            <br><br>
+                            <button onclick="window.location.reload()" style="padding: 10px 20px; cursor: pointer;">Retry</button>
+                        </div>
+                    `;
+                } else {
+                    // Start redirect countdown
+                    document.body.innerHTML = `
+                        <div style="text-align: center; padding: 50px; font-family: sans-serif;">
+                            <h1>Session Expired</h1>
+                            <p>Redirecting to login in 3 seconds...</p>
+                            <a href="login.html">Click here if not redirected</a>
+                        </div>
+                    `;
+                    setTimeout(() => window.location.href = 'login.html', 3000);
+                }
+            }
+        }
+
+        function calculateDetailBMI() {
+            const heightCm = parseFloat(document.getElementById('detail_height').value);
+            const weightKg = parseFloat(document.getElementById('detail_weight').value);
+            const bmiInput = document.getElementById('detail_bmi');
+            if (heightCm > 0 && weightKg > 0) {
+                const heightM = heightCm / 100;
+                const bmi = weightKg / (heightM * heightM);
+                bmiInput.value = bmi.toFixed(2);
+            } else {
+                bmiInput.value = '';
+            }
+        }
+
+        async function fetchPatientData() {
+            try {
+                // The backend /data/patients for 'doctor' role returns ONLY APPROVED data
+                const data = await apiCall('/data/patients');
+                if (!data) throw new Error("No data received");
+
+                allPatientsData = data;
+                renderPatientTables(data);
+            } catch (error) {
+                document.getElementById('readyTableBody').innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Error loading data: ${error.message}</td></tr>`;
+                document.getElementById('predictedTableBody').innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Error loading data: ${error.message}</td></tr>`;
+            }
+        }
+
+        /**
+         * Renders patient data into two separate tables based on prediction status.
+         */
+        function renderPatientTables(patients) {
+            const readyTableBody = document.getElementById('readyTableBody');
+            const predictedTableBody = document.getElementById('predictedTableBody');
+
+            const readyPatients = patients.filter(p => p.predictionResult === 'Pending');
+            const predictedPatients = patients.filter(p => p.predictionResult !== 'Pending');
+
+            // --- 1. Ready for Prediction Table (ReadyList) ---
+            if (readyPatients.length === 0) {
+                readyTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No patients currently ready for prediction.</td></tr>`;
+            } else {
+                readyTableBody.innerHTML = readyPatients.map(patient => {
+                    const predictionStatus = `<span class="prediction-pending">${patient.predictionResult}</span>`;
+                    return `
+                        <tr>
+                            <td>${patient.patientId}</td>
+                            <td>${patient.patientName}</td>
+                            <td>${patient.age}</td>
+                            <td>${(patient.bmi || 0).toFixed(2)}</td>
+                            <td>${patient.enteredBy?.name || 'N/A'}</td>
+                            <td>${predictionStatus}</td>
+                            <td>
+                                <button class="action-btn view-btn" onclick="showPatientDetails('${patient._id}')"><i class="fas fa-eye"></i> View/Edit</button>
+                                <button class="action-btn predict-btn" onclick="runPrediction('${patient._id}')"><i class="fas fa-brain"></i> Predict</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // --- 2. Predicted History Table (PredictedList) ---
+            if (predictedPatients.length === 0) {
+                predictedTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No prediction history found.</td></tr>`;
+            } else {
+                predictedTableBody.innerHTML = predictedPatients.map(patient => {
+                    const resultClass = patient.predictionResult.includes('Cesarean') ? 'prediction-result-red' : 'prediction-result-green';
+                    const predictionDate = new Date(patient.updatedAt).toLocaleDateString();
+                    return `
+                        <tr>
+                            <td>${patient.patientId}</td>
+                            <td>${patient.patientName}</td>
+                            <td>${patient.age}</td>
+                            <td><span class="prediction-done ${resultClass}">${patient.predictionResult}</span></td>
+                            <td>${(patient.confidenceScore || 0).toFixed(1)}%</td>
+                            <td>${predictionDate}</td>
+                            <td>
+                                <button class="action-btn view-btn" onclick="window.location.href = 'output_page.html?id=${patient._id}'">
+                                    <i class="fas fa-chart-bar"></i> View Report
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        /**
+         * Toggles between the 'ready' list and the 'predicted' list.
+         */
+        function switchListView(targetList, button) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            const readyListEl = document.getElementById('readyList');
+            const predictedListEl = document.getElementById('predictedList');
+
+            if (targetList === 'ready') {
+                readyListEl.style.display = 'block';
+                predictedListEl.style.display = 'none';
+            } else {
+                readyListEl.style.display = 'none';
+                predictedListEl.style.display = 'block';
+            }
+        }
+
+        function showPatientDetails(mongoId) {
+            const patient = allPatientsData.find(p => p._id === mongoId);
+            if (!patient) return;
+            // ... (Populate detail view fields, which are incomplete but kept for context) ...
+            document.getElementById('currentPatientId').value = patient.patientId;
+            document.getElementById('currentMongoId').value = patient._id;
+            document.getElementById('patientDetailTitle').textContent = `Patient: ${patient.patientName}`;
+            document.getElementById('detail_patientId').value = patient.patientId;
+            document.getElementById('detail_patientName').value = patient.patientName;
+            document.getElementById('detail_age').value = patient.age;
+            document.getElementById('detail_bp_systolic').value = patient.bloodPressure;
+            document.getElementById('detail_glucoseLevel').value = patient.glucoseLevel;
+            document.getElementById('detail_bmi').value = patient.bmi.toFixed(2);
+            // Setting dummy height/weight to make BMI calculation work if fields are edited
+            document.getElementById('detail_height').value = 170;
+            document.getElementById('detail_weight').value = (patient.bmi * (170 / 100) * (170 / 100)).toFixed(2);
+
+            document.getElementById('detail_gravidity').value = patient.gravidity;
+            document.getElementById('detail_parity').value = patient.parity;
+            document.getElementById('detail_gestational_age').value = patient.gestational_age;
+            document.getElementById('detail_estimated_fetal_weight').value = patient.estimated_fetal_weight;
+            document.getElementById('detail_amniotic_fluid_index').value = patient.amniotic_fluid_index;
+            document.getElementById('detail_bishop_score').value = patient.bishop_score;
+
+            // CRITICAL FIX: Set the new SELECT values
+            document.getElementById('detail_fetal_presentation').value = patient.fetal_presentation || 'Cephalic';
+            document.getElementById('detail_induction_of_labor').value = patient.induction_of_labor || 'No';
+            document.getElementById('detail_oxytocin_augmentation').value = patient.oxytocin_augmentation || 'No';
+
+            // --- History of Complications (New & Existing) ---
+            document.getElementById('detail_previous_cesarean').value = patient.previous_cesarean;
+            document.getElementById('detail_previous_vaginal_birth').value = patient.previous_vaginal_birth;
+            document.getElementById('detail_previous_assisted').value = patient.previous_assisted;
+            document.getElementById('detail_gestational_diabetes').value = patient.gestational_diabetes;
+            document.getElementById('detail_hypertension').value = patient.hypertension;
+
+            // Switch to detail view
+            document.getElementById('patientListContainer').classList.remove('active');
+            document.getElementById('patientDetailView').classList.add('active');
+            document.getElementById('patientDetailView').style.display = 'block';
+
+            // Hide the patient list tab content
+            document.getElementById('patientListContainer').style.display = 'none';
+        }
+
+        async function updatePatientRecord() {
+            // ... (updatePatientRecord logic remains unchanged)
+            const mongoId = document.getElementById('currentMongoId').value;
+            const statusElement = document.getElementById('statusMessage');
+            const updatedData = {
+                patientName: document.getElementById('detail_patientName').value,
+                age: parseFloat(document.getElementById('detail_age').value),
+                bmi: parseFloat(document.getElementById('detail_bmi').value),
+                bp_systolic: parseFloat(document.getElementById('detail_bp_systolic').value),
+                // Add all other fields required by the Mongoose model
+                gravidity: parseFloat(document.getElementById('detail_gravidity').value),
+                parity: parseFloat(document.getElementById('detail_parity').value),
+                gestational_age: parseFloat(document.getElementById('detail_gestational_age').value),
+                estimated_fetal_weight: parseFloat(document.getElementById('detail_estimated_fetal_weight').value),
+                amniotic_fluid_index: parseFloat(document.getElementById('detail_amniotic_fluid_index').value),
+                bishop_score: parseFloat(document.getElementById('detail_bishop_score').value),
+                glucoseLevel: parseFloat(document.getElementById('detail_glucoseLevel').value),
+
+                // Binary and Categorical Fields (String values from SELECTs)
+                previous_cesarean: document.getElementById('detail_previous_cesarean').value,
+                previous_vaginal_birth: document.getElementById('detail_previous_vaginal_birth').value,
+                previous_assisted: document.getElementById('detail_previous_assisted').value,
+                gestational_diabetes: document.getElementById('detail_gestational_diabetes').value,
+                hypertension: document.getElementById('detail_hypertension').value,
+
+                // CRITICAL NEW FIELDS
+                fetal_presentation: document.getElementById('detail_fetal_presentation').value,
+                induction_of_labor: document.getElementById('detail_induction_of_labor').value,
+                oxytocin_augmentation: document.getElementById('detail_oxytocin_augmentation').value,
+            };
+            try {
+                const result = await apiCall(`/data/patient/${mongoId}`, 'PUT', updatedData);
+                statusElement.textContent = `Success! Patient ${result.patientId} updated. Prediction reset to Pending.`;
+                statusElement.style.color = 'green';
+                fetchPatientData();
+                document.getElementById('patientListContainer').classList.add('active');
+                document.getElementById('patientDetailView').classList.remove('active');
+                document.getElementById('patientListContainer').style.display = 'block';
+                document.getElementById('patientDetailView').style.display = 'none';
+            } catch (error) {
+                statusElement.textContent = error.message || 'Update failed.';
+                statusElement.style.color = 'red';
+            }
+        }
+
+        async function runPrediction(mongoId) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = 'Running ML Prediction... This may take a moment.';
+            statusElement.style.color = 'orange';
+            const patient = allPatientsData.find(p => p._id === mongoId);
+
+            if (!patient || patient.reviewStatus !== 'APPROVED') {
+                statusElement.textContent = 'Error: Prediction can only be run on approved patient data.';
+                statusElement.style.color = 'red';
+                return;
+            }
+            try {
+                // The API returns the updated patient object directly (which is 'result')
+                const result = await apiCall(`/predict/patient/${mongoId}`, 'POST');
+
+
+                statusElement.textContent = `Prediction Complete! Result: ${result.predictionResult}. Redirecting...`;
+                statusElement.style.color = 'green';
+
+                // Redirect to the dedicated output page
+                setTimeout(() => {
+                    window.location.href = `output_page.html?id=${mongoId}`;
+                }, 1000);
+            } catch (error) {
+                statusElement.textContent = error.message || 'Prediction failed.';
+                statusElement.style.color = 'red';
+                fetchPatientData();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            verifySession();
+
+            document.getElementById('backToListBtn').addEventListener('click', () => {
+                document.getElementById('patientListContainer').classList.add('active');
+                document.getElementById('patientDetailView').classList.remove('active');
+                document.getElementById('patientDetailView').style.display = 'none';
+                document.getElementById('patientListContainer').style.display = 'block';
+                document.getElementById('statusMessage').textContent = '';
+                // Ensure the 'Ready' tab is active when returning to the list
+                document.querySelector('.tab-buttons .tab-button').click();
+            });
+            document.getElementById('updateDataBtn').addEventListener('click', updatePatientRecord);
+            document.getElementById('predictDetailBtn').addEventListener('click', () => {
+                const mongoId = document.getElementById('currentMongoId').value;
+                runPrediction(mongoId);
+            });
+            document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
+        });
+
+        // FORCE VISIBILITY ON LOAD
+        window.addEventListener('load', () => {
+            const container = document.getElementById('patientListContainer');
+            if (container && container.classList.contains('active')) {
+                container.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>

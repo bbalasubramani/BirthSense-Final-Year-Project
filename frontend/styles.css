@@ -1,0 +1,257 @@
+/* Global Styles */
+body {
+    background-color: #f0f4f8;
+    margin: 0;
+    font-family: 'Poppins', sans-serif; /* Using Poppins for modern look */
+    color: #333;
+    line-height: 1.6;
+    display: flex; /* Flexbox for body to ensure dashboard takes full height */
+    min-height: 100vh;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-family: "Poppins",sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 2.5rem;
+    color: #3f55e5; /* Slightly larger for main title */
+}
+
+h2 {
+    font-size: 1.8rem;
+    color: #2c3e50; /* Highlight section titles */
+}
+
+/* Dashboard Container for the main layout */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 280px 1fr; /* Fixed sidebar width, rest for content */
+    width: 100%;
+    background-color: #fff; /* Main background for the dashboard itself */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    overflow: hidden; /* To keep inner elements within bounds */
+    margin: 20px; /* Space around the entire dashboard */
+    max-width: 1400px; /* Optional: limit overall dashboard width */
+    height: calc(100vh - 40px); /* Fill screen height minus margin */
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background-color: #c7d9ef; /* Primary blue for sidebar */
+    color: black;
+    padding: 30px 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-title {
+    font-family: "Poppins",sans-serif;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 0 20px;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 5px;
+}
+
+.sidebar-nav .nav-item {
+    display: block;
+    padding: 15px 30px;
+    color: black;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-left: 5px solid transparent; /* For active indicator */
+}
+
+.sidebar-nav .nav-item:hover {
+    background-color: #c7d9ef; /* Lighter blue on hover */
+    color: #ffffff;
+}
+
+.sidebar-nav .nav-item.active {
+    background-color: #c7d9ef; /* Active background */
+    color: #ffffff;
+    border-left: 5px solid #ffcc00; /* Yellow accent for active */
+}
+
+/* Main Content Area Styling */
+.main-content {
+    background-color: #ffffff;
+    padding: 30px;
+    overflow-y: auto; /* Enable scrolling for content if it overflows */
+}
+
+.main-header {
+    background-color: #f0f4f8;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #3f55e5;
+}
+
+.content-section {
+    background-color: #f7f9fc; /* Lighter background for individual sections */
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: none; /* Hidden by default */
+}
+
+label {
+    display: flex;
+    justify-content: flex-start; /* Align labels to start */
+    align-items: center;
+    background-color: #e0e9ff; /* Lighter blue for labels */
+    padding: 10px 15px;
+    border-radius: 8px; /* Slightly less rounded than pills */
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+label:hover {
+    background-color: #d1dcfc;
+}
+
+.tick {
+    display: none; /* Hide tick by default */
+    color: #28a745; /* Green color for tick */
+    font-weight: bold;
+    margin-left: auto; /* Push tick to the right */
+    font-size: 1.1rem;
+}
+
+.tick.show {
+    display: inline-block; /* Show tick when active */
+}
+
+input, select {
+    width: calc(100% - 20px); /* Adjust width to account for padding */
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box; /* Include padding in width */
+}
+
+input:focus, select:focus {
+    border-color: #3f55e5; /* Highlight on focus */
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(63, 85, 229, 0.25);
+}
+
+/* Specific styling for warning messages */
+.warning-message {
+    color: #dc3545; /* Red for warnings */
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: none; /* Hidden by default, shown by JS */
+}
+
+/* Submit Button */
+.submit-button-container {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+#predictBtn {
+    padding: 12px 30px;
+    background-color: #28a745; /* Green submit button */
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+}
+
+#predictBtn:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .dashboard-container {
+        grid-template-columns: 1fr; /* Stack sidebar and content on smaller screens */
+        height: auto; /* Allow height to adjust */
+        margin: 10px;
+    }
+
+    .sidebar {
+        padding: 20px 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-title {
+        margin-bottom: 20px;
+    }
+
+    .sidebar-nav ul {
+        display: flex; /* Make nav items horizontal for small screens */
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .sidebar-nav .nav-item {
+        padding: 10px 15px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        border-radius: 5px; /* So the active bottom border looks good */
+    }
+
+    .sidebar-nav .nav-item.active {
+        border-left: none;
+        border-bottom: 3px solid #ffcc00;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr; /* Single column on very small screens */
+    }
+    input, select {
+        width: 100%; /* Ensure full width on mobile */
+    }
+    label {
+        justify-content: space-between; /* Better alignment for mobile */
+    }
+}

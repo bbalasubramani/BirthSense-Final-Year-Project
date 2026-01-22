@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BirthSense - Nurse Dashboard (Reviewer)</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Pangolin&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .patient-table-container {
+            margin-top: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .patient-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .patient-table th, .patient-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.9rem;
+        }
+        .patient-table th {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+        .approve-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: none;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .disapprove-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .status-pending { color: #ffc107; font-weight: 600; }
+        .status-approved { color: #28a745; font-weight: 600; }
+        .status-disapproved { color: #dc3545; font-weight: 600; }
+        .content-section:not(.active) {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">BirthSense</h2>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" class="nav-item active" data-target="pendingSubmissions" data-filter="PENDING">Pending Review</a></li>
+                    <li><a href="#" class="nav-item" data-target="approvedHistory" data-filter="APPROVED">Approved History</a></li>
+                    <li><a href="#" class="nav-item" data-target="disapprovedHistory" data-filter="DISAPPROVED">Disapproved History</a></li>
+                </ul>
+            </nav>
+            <div style="margin-top: auto; padding: 20px;">
+                <button id="logoutBtn" style="background-color: #dc3545; color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer;">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1>BirthSense - Nurse Dashboard (Reviewer)</h1>
+                <p id="dashboard-info">Manage and review data submitted by staff.</p>
+                <div id="statusMessage" style="color: green; font-weight: bold; margin-top: 10px;"></div>
+            </header>
+
+            <div id="pendingSubmissions" class="content-section active">
+                <h2>Submissions Requiring Approval</h2>
+                <div class="patient-table-container">
+                    <table class="patient-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Date Entered</th>
+                                <th>Submitted By</th>
+                                <th>Age</th>
+                                <th>Review Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingTableBody">
+                            <tr><td colspan="7" style="text-align: center;">Loading pending submissions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="approvedHistory" class="content-section">
+                <h2>Approved Patient History</h2>
+                <div class="patient-table-container">
+                    <table class="patient-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Date Entered</th>
+                                <th>Submitted By</th>
+                                <th>Age</th>
+                                <th>Review Status</th>
+                                <th>Review Note</th>
+                            </tr>
+                        </thead>
+                        <tbody id="approvedTableBody">
+                            <tr><td colspan="7" style="text-align: center;">Loading approved submissions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="disapprovedHistory" class="content-section">
+                <h2>Disapproved Submissions (Sent Back)</h2>
+                <div class="patient-table-container">
+                    <table class="patient-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Date Entered</th>
+                                <th>Submitted By</th>
+                                <th>Age</th>
+                                <th>Review Status</th>
+                                <th>Review Note</th>
+                            </tr>
+                        </thead>
+                        <tbody id="disapprovedTableBody">
+                            <tr><td colspan="7" style="text-align: center;">Loading disapproved submissions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="patientReviewModal" class="content-section" style="display: none;">
+                <h2 id="reviewPatientTitle">Review Patient: </h2>
+                <p>Review the full data entered by the staff member before approving or disapproving.</p>
+                <div id="fullPatientDataDetails" style="background: #f8f8f8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <input type="hidden" id="reviewMongoId">
+                </div>
+                <textarea id="disapproveReason" placeholder="Enter reason for disapproval (required if disapproving)" rows="3" style="width: 100%; margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; border-radius: 4px;"></textarea>
+                <button class="approve-btn" onclick="sendReview('APPROVED')"><i class="fas fa-check"></i> Approve & Send to Doctor</button>
+                <button class="disapprove-btn" onclick="sendReview('DISAPPROVED')"><i class="fas fa-times"></i> Disapprove & Send Back</button>
+                <button class="action-btn" onclick="hideReviewModal()" style="background-color: #6c757d; color: white; float: right;"><i class="fas fa-arrow-left"></i> Back to List</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+<script>
+
+
+async function verifySession() {
+  try {
+    // API_BASE_URL is now available from script.js
+    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      method: 'GET',
+      credentials: 'include', // crucial for sending JWT cookie
+    });
+
+    if (!res.ok) throw new Error('Session invalid');
+    const user = await res.json();
+    console.log('Authenticated as:', user.name, user.role);
+
+    // Restrict page access by role
+    if (user.role !== 'nurse') {
+      alert('Access denied. Nurses only.');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // Continue only if authenticated nurse
+    initNurseDashboard();
+
+  } catch (err) {
+    console.warn('Session expired or not authorized. Redirecting to login...');
+    window.location.href = 'login.html';
+  }
+}
+
+// 🔒 Logout (clears cookie on server)
+async function handleLogout() {
+  try {
+    await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+  } catch (err) {
+    console.error('Logout error:', err);
+  }
+  window.location.href = 'login.html';
+}
+
+
+function initNurseDashboard() {
+  let allPatientData = [];
+  let reviewMongoIdElement;
+  let disapproveReasonElement;
+  let statusMessageElement;
+
+  // Ensure elements are retrieved from the DOM
+  reviewMongoIdElement = document.getElementById('reviewMongoId');
+  disapproveReasonElement = document.getElementById('disapproveReason');
+  statusMessageElement = document.getElementById('statusMessage');
+
+  function hideReviewModal() {
+    // Correctly show the active content section and hide the modal
+    const activeFilterTarget = document.querySelector('.sidebar-nav .nav-item.active')?.getAttribute('data-target');
+    
+    document.querySelectorAll('.content-section').forEach(section => section.style.display = 'none');
+    if (activeFilterTarget) {
+        document.getElementById(activeFilterTarget).style.display = 'block';
+    }
+
+    document.getElementById('patientReviewModal').style.display = 'none';
+    statusMessageElement.textContent = '';
+  }
+
+  function showPatientDetails(mongoId) {
+    const patient = allPatientData.find(p => p._id === mongoId);
+    if (!patient) return;
+
+    document.querySelectorAll('.content-section').forEach(section => section.style.display = 'none');
+
+    document.getElementById('reviewPatientTitle').textContent =
+        `Review Patient: ${patient.patientName} (${patient.patientId})`;
+    reviewMongoIdElement.value = patient._id;
+    // Show Doctor's rejection reason in the textarea if applicable, otherwise Nurse's own reviewNote
+    document.getElementById('disapproveReason').value = patient.doctorStatus === 'REJECTED' ? patient.doctorNote || '' : patient.reviewNote || '';
+
+        
+        const detailsHtml = `
+            <h3>Submission Info</h3>
+            <p><strong>Patient ID:</strong> ${patient.patientId}</p>
+            <p><strong>Patient Name:</strong> ${patient.patientName}</p>
+            <p><strong>Submitted By:</strong> ${patient.enteredBy?.name || 'N/A'} (${patient.enteredBy?.role || 'N/A'})</p>
+
+            <hr style="margin: 10px 0;">
+            <h3>Basic Maternal & Health Info</h3>
+            <p><strong>Maternal Age:</strong> ${patient.age} years</p>
+            <p><strong>Height:</strong> ${patient.height} cm</p>
+            <p><strong>Weight:</strong> ${patient.weight} kg</p>
+            <p><strong>BMI:</strong> ${patient.bmi?.toFixed(2)}</p>
+            <p><strong>Systolic BP:</strong> ${patient.bp_systolic} mmHg</p>
+            <p><strong>Diastolic BP:</strong> ${patient.bp_diastolic} mmHg</p>
+            <p><strong>Glucose Level:</strong> ${patient.glucoseLevel}</p>
+            <p><strong>Gestational Diabetes:</strong> ${patient.gestational_diabetes || 'N/A'}</p>
+
+            <hr style="margin: 10px 0;">
+            <h3>Obstetric & Fetal Details</h3>
+            <p><strong>Gravidity:</strong> ${patient.gravidity}</p>
+            <p><strong>Parity:</strong> ${patient.parity}</p>
+            <p><strong>Previous Cesarean:</strong> ${patient.previous_cesarean || 'N/A'}</p>
+            <p><strong>Gestational Age:</strong> ${patient.gestational_age} weeks</p>
+            <p><strong>Estimated Fetal Weight:</strong> ${patient.estimated_fetal_weight} g</p>
+            <p><strong>Amniotic Fluid Index (AFI):</strong> ${patient.amniotic_fluid_index}</p>
+            <p><strong>Bishop Score:</strong> ${patient.bishop_score}</p>
+
+            <hr style="margin: 10px 0;">
+            <h3>System Prediction</h3>
+            <p><strong>Prediction Status:</strong> ${patient.predictionResult}</p>
+        `;
+        
+
+        document.getElementById('fullPatientDataDetails').innerHTML = detailsHtml;
+
+        document.getElementById('patientReviewModal').style.display = 'block';
+    }
+
+  async function fetchMyPatientData() {
+    try {
+      const data = await apiCall('/data/patients'); 
+      allPatientData = data;
+      renderActiveTable();
+    } catch (error) {
+      statusMessageElement.textContent = `Error loading data: ${error.message}`;
+      statusMessageElement.style.color = 'red';
+      document.getElementById('pendingTableBody').innerHTML =
+        `<tr><td colspan="7" style="text-align: center; color: red;">Error loading data.</td></tr>`;
+    }
+  }
+
+  
+  function renderActiveTable() {
+    document.getElementById('patientReviewModal').style.display = 'none';
+    const activeNav = document.querySelector('.sidebar-nav .nav-item.active');
+    const filterStatus = activeNav.getAttribute('data-filter');
+    const targetBodyId = document.getElementById(activeNav.getAttribute('data-target')).querySelector('tbody').id;
+
+    const filteredData = allPatientData.filter(p => {
+        const nurseStatus = p.reviewStatus || 'PENDING';
+        const doctorStatus = p.doctorStatus;
+
+        if (filterStatus === 'PENDING') {
+            // PENDING tab: Show initial PENDING OR patients rejected by the doctor (REJECTED by Doctor = PENDING for Nurse)
+            return nurseStatus === 'PENDING' || doctorStatus === 'REJECTED';
+        }
+        
+        if (filterStatus === 'APPROVED') {
+            // APPROVED tab: Show patients Nurse APPROVED that are NOT REJECTED by the Doctor
+            return nurseStatus === 'APPROVED' && doctorStatus !== 'REJECTED';
+        }
+        
+        if (filterStatus === 'DISAPPROVED') {
+            // DISAPPROVED tab: Show patients Nurse DISAPPROVED
+            return nurseStatus === 'DISAPPROVED';
+        }
+
+        return false;
+    });
+
+    renderSingleTable(filteredData, targetBodyId, filterStatus === 'PENDING');
+  }
+
+  async function sendReview(status) {
+    if (!reviewMongoIdElement || !disapproveReasonElement || !statusMessageElement) {
+      alert('Error: Review modal not ready. Please refresh.');
+      return;
+    }
+
+    const mongoId = reviewMongoIdElement.value;
+    const reviewNote = disapproveReasonElement.value.trim();
+
+    if (!mongoId) {
+      statusMessageElement.textContent = 'Error: Patient ID is empty.';
+      statusMessageElement.style.color = 'red';
+      return;
+    }
+
+    if (status === 'DISAPPROVED' && !reviewNote) {
+      statusMessageElement.textContent = 'Disapproval reason is required.';
+      statusMessageElement.style.color = 'red';
+      return;
+    }
+
+    statusMessageElement.textContent = `Sending review (${status})...`;
+    statusMessageElement.style.color = 'orange';
+
+    try {
+      const result = await apiCall(`/data/patient/${mongoId}/review`, 'PUT', { status, reviewNote });
+      statusMessageElement.textContent = `Submission ${result.patient.patientId} ${status} successfully!`;
+      statusMessageElement.style.color = 'green';
+      
+      hideReviewModal();
+      fetchMyPatientData();
+    } catch (error) {
+      statusMessageElement.textContent = error.message || 'Review failed.';
+      statusMessageElement.style.color = 'red';
+    }
+  }
+
+  
+  function renderSingleTable(patients, tableBodyId, isPendingView) {
+    const tableBody = document.getElementById(tableBodyId);
+    if (!tableBody) return;
+
+    if (!patients?.length) {
+      const message = isPendingView
+        ? "No patient data currently pending your review."
+        : "No matching history records found.";
+      tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">${message}</td></tr>`;
+      return;
+    }
+
+    tableBody.innerHTML = patients.map(patient => {
+      let nurseStatus = patient.reviewStatus || 'PENDING';
+      let doctorStatus = patient.doctorStatus;
+      let displayStatusText = nurseStatus.charAt(0) + nurseStatus.slice(1).toLowerCase();
+      
+      let statusClass = nurseStatus === 'APPROVED'
+        ? 'status-approved'
+        : nurseStatus === 'DISAPPROVED'
+          ? 'status-disapproved'
+          : 'status-pending';
+
+      let actionHtml = '—';
+      let reviewNoteDisplay = patient.reviewNote || '—';
+      
+      // === PENDING VIEW LOGIC ===
+      if (isPendingView) {
+          actionHtml = `<button class="approve-btn" onclick="showPatientDetails('${patient._id}')">
+              <i class="fas fa-eye"></i> Review
+          </button>`;
+          
+          if (doctorStatus === 'REJECTED') {
+              displayStatusText = 'Doctor Rejected';
+              statusClass = 'status-disapproved';
+              reviewNoteDisplay = patient.doctorNote || 'No reason provided';
+          } else {
+              displayStatusText = 'Pending Nurse Review';
+          }
+      } 
+      // === HISTORY VIEW LOGIC (Approved & Disapproved) ===
+      else {
+          if (nurseStatus === 'APPROVED') {
+              if (doctorStatus === 'FINALIZED') {
+                  displayStatusText = 'Finalized';
+                  statusClass = 'status-approved';
+              } else {
+                  displayStatusText = 'Sent to Doctor';
+                  statusClass = 'status-approved';
+              }
+              reviewNoteDisplay = 'N/A';
+              actionHtml = reviewNoteDisplay;
+          } else if (nurseStatus === 'DISAPPROVED') {
+              displayStatusText = 'Disapproved';
+              statusClass = 'status-disapproved';
+              reviewNoteDisplay = patient.reviewNote || 'No reason provided';
+              actionHtml = reviewNoteDisplay;
+          }
+      }
+
+      return `
+        <tr>
+          <td>${patient.patientId}</td>
+          <td>${patient.patientName}</td>
+          <td>${new Date(patient.createdAt).toLocaleDateString()}</td>
+          <td>${patient.enteredBy?.name || 'N/A'} (${patient.enteredBy?.role || 'N/A'})</td>
+          <td>${patient.age}</td>
+          <td><span class="${statusClass}">${displayStatusText}</span></td>
+          <td>${actionHtml}</td>
+        </tr>`;
+    }).join('');
+  }
+
+ 
+  document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      document.querySelectorAll('.sidebar-nav .nav-item').forEach(nav => nav.classList.remove('active'));
+      this.classList.add('active');
+
+      const targetId = this.getAttribute('data-target');
+      document.querySelectorAll('.content-section').forEach(section => section.style.display = 'none');
+      document.getElementById(targetId).style.display = 'block';
+
+      renderActiveTable();
+    });
+  });
+
+  document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
+  fetchMyPatientData();
+  
+  // 🛑 EXPOSE ALL HANDLERS TO GLOBAL SCOPE
+  window.sendReview = sendReview;
+  window.showPatientDetails = showPatientDetails;
+  window.hideReviewModal = hideReviewModal;
+}
+
+
+document.addEventListener('DOMContentLoaded', verifySession);
+</script>
+
+</body>
+</html>

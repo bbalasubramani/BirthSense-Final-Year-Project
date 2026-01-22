@@ -1,0 +1,560 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BirthSense - Prediction Output</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-color: #f7f9fc;
+      --card-bg: #ffffff;
+      --sidebar-bg: #2c3e50;
+      --text-color-primary: #1e2023;
+      --text-color-secondary: #6c757d;
+      --border-color: #e9ecef;
+      --primary-color: #3f55e5;
+      --accent-color-green: #28a745;
+      --accent-color-red: #dc3545;
+      --header-bg: linear-gradient(to right, #a8c0ff, #3f55e5);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 0;
+      color: var(--text-color-primary);
+    }
+
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: var(--sidebar-bg);
+      padding: 24px;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: #fff;
+    }
+
+    .main-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .main-menu li a {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: #b0c4de;
+      font-size: 16px;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+    }
+
+    .main-menu li a:hover,
+    .main-menu li a.active {
+      background-color: #405a76;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .main-menu li a .icon {
+      margin-right: 12px;
+    }
+
+    .main-content {
+      flex-grow: 1;
+      padding: 30px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+      color: #2c3e50;
+    }
+
+    .header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+    .header-actions .action-button {
+      background-color: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions .action-button:hover {
+      background-color: #3146b2;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      padding: 24px;
+    }
+
+    .stat-card .card-title {
+      font-size: 14px;
+      color: var(--text-color-secondary);
+      margin-bottom: 8px;
+    }
+
+    .stat-card .main-value {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .prediction-card.Vaginal .main-value {
+      color: var(--accent-color-green);
+    }
+
+    .prediction-card.Cesarean .main-value {
+      color: var(--accent-color-red);
+    }
+
+    .prediction-card.Pending .main-value {
+      color: orange;
+    }
+
+    .data-section {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      padding: 24px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+    }
+
+    .tab-buttons .tab-button {
+      background-color: transparent;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-color-secondary);
+      font-weight: 500;
+      position: relative;
+      transition: color 0.2s ease;
+    }
+
+    .tab-buttons .tab-button:hover,
+    .tab-buttons .tab-button.active {
+      color: var(--text-color-primary);
+    }
+
+    .tab-buttons .tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -11px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary-color);
+    }
+
+    .data-table {
+      width: 100%;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-table th {
+      color: var(--text-color-secondary);
+      font-weight: 600;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .right-sidebar {
+      width: 350px;
+      background-color: var(--card-bg);
+      padding: 24px;
+      box-shadow: -2px 0 6px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ---- Updated shap-content section ---- */
+    .shap-content {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .shap-content h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+      border-left: 4px solid var(--primary-color);
+      padding-left: 10px;
+    }
+
+    .shap-content p {
+      font-size: 14px;
+      color: var(--text-color-secondary);
+      margin-bottom: 15px;
+    }
+
+    .ranking-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .ranking-item .label {
+      flex: 1;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+
+    .bar-container {
+      flex: 2;
+      height: 10px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3f55e5, #6b7cff);
+      border-radius: 5px;
+      transition: width 0.6s ease;
+    }
+
+    .ranking-item .value {
+      flex: 0 0 40px;
+      text-align: right;
+      font-weight: 600;
+      color: var(--text-color-secondary);
+    }
+
+    @media print {
+      body {
+        background-color: #fff !important;
+        color: #000 !important;
+        font-size: 10pt;
+      }
+
+      .dashboard-container {
+        display: block;
+      }
+
+      .sidebar,
+      .header-actions,
+      .tabs,
+      .right-sidebar,
+      .action-button {
+        display: none !important;
+      }
+
+      .main-content {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      .card,
+      .data-section {
+        box-shadow: none !important;
+        border: 1px solid #ccc;
+        border-radius: 0;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .data-table th,
+      .data-table td {
+        border-bottom: 1px solid #ddd !important;
+        padding: 8px 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="logo">BirthSense</div>
+      <nav class="main-menu">
+        <ul>
+          <li><a href="data_entry.html"><i class="fas fa-user-shield icon"></i> Data Entry Dashboard</a></li>
+          <li><a href="nurse.html"><i class="fas fa-user-nurse icon"></i> Nurse Dashboard</a></li>
+          <li><a href="doctor.html"><i class="fas fa-stethoscope icon"></i> Doctor Dashboard</a></li>
+          <li><a href="admin.html"><i class="fas fa-user-shield icon"></i> Admin Dashboard</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="header">
+        <h1 id="predictionHeader">Prediction Output for Patient: </h1>
+      </header>
+
+      <div class="stats-grid">
+        <div class="card stat-card prediction-card" id="predictionCard">
+          <div class="card-header">
+            <span class="card-title">Predicted Outcome</span>
+          </div>
+          <div class="card-body">
+            <span class="main-value" id="predictionResult">Loading...</span>
+          </div>
+        </div>
+
+        <div class="card stat-card confidence-card">
+          <div class="card-header">
+            <span class="card-title">Model Confidence</span>
+          </div>
+          <div class="card-body">
+            <span class="main-value" id="confidenceScore">N/A</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-section">
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active">Input Features</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Value</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="inputDataTableBody">
+              <tr>
+                <td colspan="3" style="text-align: center;">Fetching input data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <aside class="right-sidebar">
+      <div class="shap-content">
+        <div class="header-actions">
+          <button class="action-button" id="printBtn"><i class="fas fa-print"></i> Print Report</button>
+          <button class="action-button" id="backToDashboardBtn"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+       
+    </aside>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    const SIMULATED_SHAP_DATA = [
+      { label: "Glucose Level", value: 0.95 },
+      { label: "BMI", value: 0.88 },
+      { label: "Maternal Age", value: 0.70 },
+      { label: "Blood Pressure", value: 0.62 },
+    ];
+
+    function getPatientIdFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('id');
+    }
+
+    async function loadPredictionData() {
+    const patientId = getPatientIdFromUrl();
+    if (!patientId) {
+      document.getElementById('predictionResult').textContent = 'Error: No Patient ID provided.';
+      document.getElementById('predictionCard').classList.add('danger');
+      document.getElementById('predictionHeader').textContent = 'Error';
+      return;
+    }
+
+    try {
+        
+        const patient = await apiCall(`/data/patient/${patientId}`); 
+
+        if (!patient) throw new Error("Patient not found.");
+        
+        // Ensure confidence score is a number before calling toFixed
+        const confidenceScore = parseFloat(patient.confidenceScore);
+        const scorePercentage = isNaN(confidenceScore) ? 'N/A' : confidenceScore.toFixed(1);
+
+        document.getElementById('predictionHeader').textContent =
+          `Prediction Output for Patient: ${patient.patientName} (${patient.patientId})`;
+
+        const result = patient.predictionResult;
+        
+        document.getElementById('predictionResult').textContent = result;
+        document.getElementById('predictionCard').className =
+          'card stat-card prediction-card ' +
+          (result?.includes('Vaginal') ? 'Vaginal' :
+            result?.includes('Cesarean') ? 'Cesarean' : 'Pending');
+
+        document.getElementById('confidenceScore').textContent = `${scorePercentage}%`;
+
+        const dataBody = document.getElementById('inputDataTableBody');
+        const inputFeatures = [
+        { feature: 'Patient Name', value: patient.patientName || 'N/A', group: 'Identity', source: patient.enteredBy?.name || 'N/A' },
+        { feature: 'Patient ID', value: patient.patientId || 'N/A', group: 'Identity', source: 'System' },
+        { feature: 'Maternal Age', value: (patient.age || 'N/A') + ' years', group: 'Basic Info' },
+        { feature: 'Height', value: (patient.height || 'N/A') + ' cm', group: 'Basic Info' },
+        { feature: 'Weight', value: (patient.weight || 'N/A') + ' kg', group: 'Basic Info' },
+        { feature: 'BMI', value: patient.bmi?.toFixed(2) || 'N/A', group: 'Basic Info' },
+        { feature: 'Gravidity', value: patient.gravidity || 'N/A', group: 'Obstetric History' },
+        { feature: 'Parity', value: patient.parity || 'N/A', group: 'Obstetric History' },
+        { feature: 'Previous Cesarean', value: patient.previous_cesarean || patient.prev_ceaserean || 'N/A', group: 'Obstetric History' },
+        { 
+            feature: 'Previous Assisted Birth', 
+            value: patient.previous_assisted || patient.prev_assisted || 'N/A', 
+            group: 'Obstetric History' 
+        },
+        { feature: 'Gestational Age', value: (patient.gestational_age || 'N/A') + ' weeks', group: 'Current Pregnancy' },
+        { feature: 'Estimated Fetal Weight', value: (patient.estimated_fetal_weight || 'N/A') + ' g', group: 'Current Pregnancy' },
+        { feature: 'Amniotic Fluid Index (AFI)', value: patient.amniotic_fluid_index || 'N/A', group: 'Current Pregnancy' },
+        
+        { 
+            feature: 'Hypertension/Preeclampsia', 
+            value: patient.hypertension || patient.hypertension_preeclampsia || 'N/A', 
+            group: 'Clinical Status' 
+        },
+        
+        { feature: 'Bishop Score', value: patient.bishop_score || 'N/A', group: 'Clinical Metrics' },
+        { feature: 'Systolic BP', value: (patient.bp_systolic || 'N/A') + ' mmHg', group: 'Clinical Metrics' },
+        { feature: 'Diastolic BP', value: (patient.bp_diastolic || 'N/A') + ' mmHg', group: 'Clinical Metrics' },
+        { feature: 'Glucose Level', value: patient.glucoseLevel || 'N/A', group: 'Clinical Metrics' },
+        { feature: 'Gestational Diabetes', value: patient.gestational_diabetes || 'N/A', group: 'Clinical Status' },
+        { 
+            feature: 'Previous Vaginal Birth', 
+            value: patient.previous_vaginal_birth || patient.prev_vaginal_birth || 'N/A', 
+            group: 'Clinical Status' 
+        },
+        
+        { 
+            feature: 'Induction of Labor', 
+            value: patient.induction_of_labor || 'N/A', 
+            group: 'Labor & Delivery' 
+        },
+
+        { 
+            feature: 'Oxytocin Augmentation', 
+            value: patient.oxytocin_augmentation || 'N/A', 
+            group: 'Labor & Delivery' 
+        },
+        
+        // Add Fetal Presentation which seems to be missing from the list definition
+        {
+            feature: 'Fetal Presentation',
+            value: patient.fetal_presentation || 'N/A',
+            group: 'Current Pregnancy'
+        }
+    ];
+
+        dataBody.innerHTML = inputFeatures.map(item => `
+          <tr>
+            <td>${item.feature}</td>
+            <td>${item.value}</td>
+            <td>${item.source || item.group}</td>
+          </tr>
+        `).join('');
+
+        renderShapRanking();
+      } catch (error) {
+        document.getElementById('predictionResult').textContent = 'Failed to load data.';
+        document.getElementById('predictionCard').className = 'card stat-card prediction-card Pending';
+        document.getElementById('predictionHeader').textContent = 'Error Loading Prediction';
+        console.error("Error in loadPredictionData:", error);
+      }
+    }
+
+    function renderShapRanking() {
+      const list = document.getElementById('shapRankingList');
+      if (!list) return;
+      list.innerHTML = SIMULATED_SHAP_DATA.map(item => {
+        const barWidth = (item.value * 100).toFixed(0);
+        return `
+          <div class="ranking-item">
+            <span class="label">${item.label}</span>
+            <div class="bar-container"><div class="bar" style="width: ${barWidth}%;"></div></div>
+            <span class="value">${item.value.toFixed(2)}</span>
+          </div>`;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPredictionData();
+      document.getElementById('printBtn').addEventListener('click', () => window.print());
+      document.getElementById('backToDashboardBtn').addEventListener('click', () => window.location.href = 'doctor.html');
+    });
+  </script>
+</body>
+</html>

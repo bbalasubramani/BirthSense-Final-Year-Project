@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: linear-gradient(to bottom, rgba(160, 216, 239, 0.7), rgba(255, 255, 255, 0.7)), url('static/images/back_image.jpg');
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px);
+    z-index: -1;
+}
+
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            color: #000;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #004d66;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.25);
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        label {
+            font-size: 14px;
+            margin-top: 12px;
+            display: block;
+            font-weight: bold;
+        }
+        .btn-submit{
+            background-color: #3f55e5;
+            border-radius: 50px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background-color: #4CAF50;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+const API_BASE_URL = 'http://localhost:5000/api';
+
+async function handleLogin(event) {
+  event.preventDefault();
+  const email = document.getElementById("username_email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const errorElement = document.getElementById("login-error");
+  errorElement.textContent = "";
+
+  if (!email || !password) {
+    errorElement.textContent = "Please enter both email and password.";
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Login failed');
+
+    const role = data.role?.toLowerCase();
+    switch (role) {
+      case 'doctor': window.location.href = 'doctor.html'; break;
+      case 'nurse': window.location.href = 'nurse.html'; break;
+      case 'admin': window.location.href = 'admin.html'; break;
+      case 'data_entry': window.location.href = 'data_entry.html'; break;
+      default:
+        errorElement.textContent = 'Unknown role. Contact admin.';
+    }
+  } catch (err) {
+    errorElement.textContent = err.message;
+  }
+}
+</script>
+</head>
+<body>
+    <form class="container" onsubmit="handleLogin(event)">
+        <h1>Login</h1>
+
+        <label for="username_email">Email</label>
+        <input type="email" id="username_email" placeholder="Enter email" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password" required>
+
+        <p id="login-error" class="error-message"></p>
+        <button type="submit" class="btn-submit">Login</button>
+        <p style="text-align: center; font-size: 0.9em; margin-top: 15px;">
+            Don't have an account? <a href="signup.html" style="color: #3f55e5; font-weight: bold;">Sign Up</a>
+        </p>
+    </form>
+</body>
+</html>
