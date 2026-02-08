@@ -1,3 +1,4 @@
+// backend/server.js
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/config.js';
@@ -10,6 +11,7 @@ import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import dataRoutes from './routes/data.js';
 import predictionRoutes from './routes/prediction.js';
+
 import errorHandler from './utils/errorHandler.js';
 
 // Configuration
@@ -17,6 +19,9 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Resolve paths for static serving in development
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -27,10 +32,9 @@ app.use(cookieParser());
 
 // CORS Configuration
 // Allows your Vercel frontend to communicate with the backend
+const allowedOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5000';
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? true // Allows the production domain
-    : 'http://localhost:5000',
+  origin: allowedOrigin,
   credentials: true
 }));
 
@@ -45,9 +49,9 @@ app.use('/api/predict', predictionRoutes);
  * In development, we serve the frontend folder manually.
  */
 if (process.env.NODE_ENV !== 'production') {
-  const frontendPath = path.resolve(__dirname, '..', 'frontend'); 
+  const frontendPath = path.resolve(__dirname, '..', 'frontend');
   app.use(express.static(frontendPath));
-  
+
   app.get('/', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
@@ -60,13 +64,12 @@ if (process.env.NODE_ENV !== 'production') {
 // Error handling middleware (must be after routes)
 app.use(errorHandler);
 
-// START SERVER (Local only)
-const PORT = process.env.PORT || 5000;
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`✅ Server running locally on http://localhost:${PORT}`);
-  });
-}
-
 // EXPORT FOR VERCEL
 export default app;
+
+if (process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
+  // Start server for local development
+  app.listen(PORT, () =>
+    console.log(`✅ Server running in ${process.env.NODE_ENV} mode on port ${PORT}. Access frontend at http://localhost:${PORT}/index.html`)
+  );
+}
