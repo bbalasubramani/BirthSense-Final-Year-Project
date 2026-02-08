@@ -62,6 +62,13 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
+// At the bottom of server.js
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+}
+
+export default app; // Vercel needs this export to handle the request
+
 // Error handler
 app.use(errorHandler);
 
