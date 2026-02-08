@@ -1,78 +1,72 @@
-// backend/server.js
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/config.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Routes
 import authRoutes from './routes/auth.js';
 import dataRoutes from './routes/data.js';
 import predictionRoutes from './routes/prediction.js';
-
 import errorHandler from './utils/errorHandler.js';
-import path from 'path'; // 💡 Core Node.js module for path manipulation
-import { fileURLToPath } from 'url';
 
-// Load environment variables
+// Configuration
 dotenv.config();
 connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// 💡 NEW: Define __dirname equivalent and Frontend Path for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// Assuming the frontend files are in the directory above the 'backend' folder
-const frontendPath = path.resolve(__dirname, '..');
 
-
-// Middleware
+// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS (simplified as the proxy fix makes it Same-Origin, but kept for security)
+// CORS Configuration
+// Allows your Vercel frontend to communicate with the backend
 app.use(cors({
-  origin: 'http://localhost:5000',
+  origin: process.env.NODE_ENV === 'production' 
+    ? true // Allows the production domain
+    : 'http://localhost:5000',
   credentials: true
 }));
 
-
-// Route Definitions
+// API Route Definitions
 app.use('/api/auth', authRoutes);
 app.use('/api/data', dataRoutes);
 app.use('/api/predict', predictionRoutes);
 
-
-
-// 👇👇👇 FIX: SERVE FRONTEND STATIC FILES FROM THE API PORT (5000) 👇👇👇
-
-if (process.env.NODE_ENV === 'development') {
-  // 1. Set the static directory (serves script.js, styles.css, images, etc.)
+/**
+ * STATIC FILE SERVING
+ * In production (Vercel), vercel.json handles routing.
+ * In development, we serve the frontend folder manually.
+ */
+if (process.env.NODE_ENV !== 'production') {
+  const frontendPath = path.resolve(__dirname, '..', 'frontend'); 
   app.use(express.static(frontendPath));
-
-  // 2. Explicitly handle the root and HTML files (ensures all .html routes work)
+  
   app.get('/', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
 
-  // Fallback for any request that looks like an HTML file (doctor.html, login.html)
   app.get('/*.html', (req, res) => {
     res.sendFile(path.join(frontendPath, req.path));
   });
 }
 
-// At the bottom of server.js
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
-}
-
-export default app; // Vercel needs this export to handle the request
-
-// Error handler
+// Error handling middleware (must be after routes)
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () =>
-  console.log(`✅ Server running in ${process.env.NODE_ENV} mode on port ${PORT}. Access frontend at http://localhost:${PORT}/index.html`)
-);
+// START SERVER (Local only)
+const PORT = process.env.PORT || 5000;
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`✅ Server running locally on http://localhost:${PORT}`);
+  });
+}
+
+// EXPORT FOR VERCEL
+export default app;
