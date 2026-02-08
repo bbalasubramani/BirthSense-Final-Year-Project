@@ -6,14 +6,22 @@
       "use": "@vercel/node"
     },
     {
-      "src": "backend/ml_service/*.py",
-      "use": "@vercel/python"
+      "src": "frontend/**",
+      "use": "@vercel/static"
     }
   ],
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "backend/server.js"
+    },
+    {
+      "source": "/static/(.*)",
+      "destination": "frontend/static/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "frontend/$1"
     }
   ]
 }
