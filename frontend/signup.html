@@ -87,12 +87,7 @@ body::before {
     </style>
     <script src="config.js"></script>
     <script>
-        const isLocalhost =
-            window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1';
-        const API_BASE_URL = window.API_BASE_URL || (isLocalhost
-            ? 'http://localhost:5000/api'
-            : 'https://birthsense-backend.onrender.com/api'); 
+        const API_BASE_URL = window.API_BASE_URL;
 
         async function handleSignup(event) {
             event.preventDefault(); 
