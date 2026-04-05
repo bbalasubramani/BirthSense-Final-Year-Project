@@ -11,5 +11,5 @@
     ? 'http://localhost:5000/api'
     : isRenderHosted
       ? `${origin}/api`
-      : 'https://birthsense-backend.onrender.com/api';
+      : 'https://birthsense-final-year-project-1.onrender.com/api';
 })();
