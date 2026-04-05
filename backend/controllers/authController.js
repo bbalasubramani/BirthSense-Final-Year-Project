@@ -7,14 +7,15 @@ import User from '../models/User.js';
  * Helper to generate JWT and store it as HTTP-only cookie
  */
 const generateToken = (res, userId) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_COOKIE_EXPIRES_IN || '30d',
   });
 
   res.cookie('jwt', token, {
     httpOnly: true,                // prevents JS access
-    secure: process.env.NODE_ENV !== 'development',
-    sameSite: 'strict',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'strict',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
 };
@@ -80,11 +81,12 @@ export const login = asyncHandler(async (req, res) => {
  * @access Private
  */
 export const logout = asyncHandler(async (req, res) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('jwt', '', {
     httpOnly: true,
     expires: new Date(0),
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV !== 'development',
+    sameSite: isProduction ? 'none' : 'strict',
+    secure: isProduction,
   });
   res.status(200).json({ message: 'Logged out successfully' });
 });
