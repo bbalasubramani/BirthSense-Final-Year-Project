@@ -85,8 +85,14 @@ body::before {
             background-color: #45a049;
         }
     </style>
+    <script src="config.js"></script>
     <script>
-        const API_BASE_URL = 'http://localhost:5000/api'; 
+        const isLocalhost =
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1';
+        const API_BASE_URL = window.API_BASE_URL || (isLocalhost
+            ? 'http://localhost:5000/api'
+            : 'https://birthsense-backend.onrender.com/api'); 
 
         async function handleSignup(event) {
             event.preventDefault(); 
@@ -114,6 +120,7 @@ body::before {
                 const response = await fetch(`${API_BASE_URL}/auth/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ name, email, password, role })
                 });
 
