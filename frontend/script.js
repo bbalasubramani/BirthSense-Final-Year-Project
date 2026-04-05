@@ -1,15 +1,7 @@
 // ✅ script.js — fixed JWT/session issue (includes credentials everywhere)
 
 // --- API UTILITIES (for communication with Express Backend) ---
-const isLocalhost =
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1';
-
-const API_BASE_URL =
-  window.API_BASE_URL ||
-  (isLocalhost
-    ? 'http://localhost:5000/api'
-    : 'https://birthsense-backend.onrender.com/api');
+const API_BASE_URL = window.API_BASE_URL;
 
 /**
  * Universal API function.
