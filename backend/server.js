@@ -31,10 +31,38 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // CORS Configuration
-// Allows your Vercel frontend to communicate with the backend
-const allowedOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5000';
+const allowedOrigins = new Set(
+  (process.env.FRONTEND_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
+
+// Local development defaults
+allowedOrigins.add('http://localhost:5000');
+allowedOrigins.add('http://127.0.0.1:5000');
+allowedOrigins.add('http://localhost:5500');
+allowedOrigins.add('http://127.0.0.1:5500');
+
 app.use(cors({
-  origin: allowedOrigin,
+   origin: (origin, callback) => {
+    // Allow non-browser clients/tools that do not send Origin
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.has(origin)) return callback(null, true);
+
+    // Allow Netlify deploy-preview and production subdomains
+    try {
+      const { hostname, protocol } = new URL(origin);
+      if (protocol === 'https:' && hostname.endsWith('.netlify.app')) {
+        return callback(null, true);
+      }
+    } catch (error) {
+      // fall through to rejection
+    }
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true
 }));
 
@@ -67,9 +95,9 @@ app.use(errorHandler);
 // EXPORT FOR VERCEL
 export default app;
 
-if (process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
-  // Start server for local development
+if (process.env.VERCEL !== '1') {
+  // Start server for local development and container deployments (e.g., Render)
   app.listen(PORT, () =>
-    console.log(`✅ Server running in ${process.env.NODE_ENV} mode on port ${PORT}. Access frontend at http://localhost:${PORT}/index.html`)
+    console.log(`✅ Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}.`)
   );
 }
