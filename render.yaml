@@ -5,9 +5,11 @@ services:
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
     envVars:
-      - key: MONGODB_URI
+      - key: MONGO_URI
         sync: false
       - key: JWT_SECRET
+        sync: false
+        key: FRONTEND_ORIGIN
         sync: false
       - key: PORT
         value: 10000
