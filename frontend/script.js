@@ -2,6 +2,7 @@
 
 // --- API UTILITIES (for communication with Express Backend) ---
 const API_BASE_URL = window.API_BASE_URL;
+const API_BACKUP_BASE_URLS = window.API_BACKUP_BASE_URLS || [];
 
 /**
  * Universal API function.
@@ -10,6 +11,10 @@ const API_BASE_URL = window.API_BASE_URL;
  */
 
 async function apiCall(endpoint, method = 'GET', body = null) {
+  const baseUrls = [API_BASE_URL, ...API_BACKUP_BASE_URLS.filter((url) => url !== API_BASE_URL)];
+  let lastError = null;
+
+  for (const baseUrl of baseUrls) {
   try {
     const options = {
       method,
@@ -18,7 +23,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     };
     if (body) options.body = JSON.stringify(body);
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+    const response = await fetch(`${baseUrl}${endpoint}`, options);
     const data = await response.json().catch(() => ({}));
 
     if (response.status === 401 || response.status === 403) {
@@ -27,18 +32,28 @@ async function apiCall(endpoint, method = 'GET', body = null) {
       return null;
     }
 
+    if (response.status >= 500 && baseUrl !== baseUrls[baseUrls.length - 1]) {
+      throw new Error(`Server temporarily unavailable (${response.status})`);
+    }
     if (!response.ok) throw new Error(data.message || 'API Error');
     return data;
   } catch (err) {
-    console.error(`API Error @ ${endpoint}:`, err.message);
-    const msg = document.getElementById('statusMessage');
-    if (msg) {
-      msg.textContent = `Error: ${err.message}`;
-      msg.style.color = 'red';
+   lastError = err;
+    const mayRetry = baseUrl !== baseUrls[baseUrls.length - 1];
+    console.error(`API Error @ ${endpoint} via ${baseUrl}:`, err.message);
+
+    if (!mayRetry) {
+      const msg = document.getElementById('statusMessage');
+      if (msg) {
+        msg.textContent = `Error: ${err.message}`;
+        msg.style.color = 'red';
+      }
     }
     throw err;
   }
 }
+
+  throw lastError || new Error('API Error');
 
 /**
  * ✅ Dedicated login function with credentials included.
