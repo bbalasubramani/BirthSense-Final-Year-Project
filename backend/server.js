@@ -43,6 +43,8 @@ const allowedOrigins = new Set([
   ...parseOrigins(process.env.FRONTEND_ORIGIN || ''),
   ...parseOrigins(process.env.CORS_ALLOWED_ORIGINS || ''),
   normalizeOrigin(process.env.NETLIFY_URL || ''),
+  normalizeOrigin(process.env.PUBLIC_FRONTEND_URL || ''),
+  normalizeOrigin('https://birthsense.netlify.app'),
   normalizeOrigin(process.env.RENDER_EXTERNAL_URL || '')
 ].filter(Boolean));
 
