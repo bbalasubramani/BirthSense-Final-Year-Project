@@ -31,29 +31,39 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // CORS Configuration
-const allowedOrigins = new Set(
-  (process.env.FRONTEND_ORIGIN || '')
+const normalizeOrigin = (value = '') => value.trim().replace(/\/$/, '');
+
+const parseOrigins = (value = '') =>
+  value
     .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean)
-);
+    .map((origin) => normalizeOrigin(origin))
+    .filter(Boolean);
+
+const allowedOrigins = new Set([
+  ...parseOrigins(process.env.FRONTEND_ORIGIN || ''),
+  ...parseOrigins(process.env.CORS_ALLOWED_ORIGINS || ''),
+  normalizeOrigin(process.env.NETLIFY_URL || ''),
+  normalizeOrigin(process.env.RENDER_EXTERNAL_URL || '')
+].filter(Boolean));
 
 // Local development defaults
-allowedOrigins.add('http://localhost:5000');
-allowedOrigins.add('http://127.0.0.1:5000');
-allowedOrigins.add('http://localhost:5500');
-allowedOrigins.add('http://127.0.0.1:5500');
+allowedOrigins.add(normalizeOrigin('http://localhost:5000'));
+allowedOrigins.add(normalizeOrigin('http://127.0.0.1:5000'));
+allowedOrigins.add(normalizeOrigin('http://localhost:5500'));
+allowedOrigins.add(normalizeOrigin('http://127.0.0.1:5500'));
 
-app.use(cors({
-   origin: (origin, callback) => {
+const corsOptions = {
+  origin: (origin, callback) => {
     // Allow non-browser clients/tools that do not send Origin
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.has(origin)) return callback(null, true);
+    const normalizedOrigin = normalizeOrigin(origin);
+
+    if (allowedOrigins.has(normalizedOrigin)) return callback(null, true);
 
     // Allow Netlify deploy-preview and production subdomains
     try {
-      const { hostname, protocol } = new URL(origin);
+      const { hostname, protocol } = new URL(normalizedOrigin);
       if (protocol === 'https:' && hostname.endsWith('.netlify.app')) {
         return callback(null, true);
       }
@@ -63,8 +73,13 @@ app.use(cors({
 
     return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
-  credentials: true
-}));
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // API Route Definitions
 app.use('/api/auth', authRoutes);
