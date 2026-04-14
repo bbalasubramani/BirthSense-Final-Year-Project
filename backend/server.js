@@ -70,6 +70,9 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/data', dataRoutes);
 app.use('/api/predict', predictionRoutes);
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 
 /**
  * STATIC FILE SERVING
@@ -86,6 +89,13 @@ if (process.env.NODE_ENV !== 'production') {
 
   app.get('/*.html', (req, res) => {
     res.sendFile(path.join(frontendPath, req.path));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.status(200).json({
+      message: 'BirthSense backend is running',
+      health: '/api/health'
+    });
   });
 }
 
