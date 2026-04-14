@@ -591,18 +591,23 @@
 
         // --- API Helper ---
         async function apiCall(url, method = 'GET', data = null) {
+            const apiBase = (window.API_BASE_URL || '').replace(/\/$/, '');
+            const normalizedPath = url.startsWith('/api/') ? url.replace(/^\/api/, '') : url;
+            const requestUrl = /^https?:\/\//i.test(url) ? url : `${apiBase}${normalizedPath}`;
+
             const options = {
                 method,
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                credentials: 'include'
             };
             if (data) {
                 options.body = JSON.stringify(data);
             }
 
             try {
-                const response = await fetch(url, options);
+                const response = await fetch(requestUrl, options);
                 const contentType = response.headers.get('content-type');
 
                 if (!response.ok) {
