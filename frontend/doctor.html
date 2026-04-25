@@ -334,12 +334,8 @@
 
         async function verifySession() {
             try {
-                const res = await fetch(`${API_BASE_URL}/auth/me`, {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-                if (!res.ok) throw new Error('Session invalid');
-                const user = await res.json();
+                const user = await apiCall('/auth/me', 'GET');
+                if (!user) throw new Error('Session invalid');
 
 
                 // 🛑 Assuming 'doctor' role check here, update if your backend uses a different field
@@ -361,8 +357,9 @@
                             <p>Cannot connect to the server at <strong>${API_BASE_URL}</strong>.</p>
                             <p>Please ensure:</p>
                             <ul style="display: inline-block; text-align: left;">
-                                <li>The backend server is running (npm start)</li>
-                                <li>You are accessing this via http://localhost:5000</li>
+                                <li>The backend server is running</li>
+                                <li>If deployed, backend URL in <code>config.js</code> is valid and awake</li>
+                                <li>If local, open frontend from <code>http://localhost:5000</code></li>
                             </ul>
                             <br><br>
                             <button onclick="window.location.reload()" style="padding: 10px 20px; cursor: pointer;">Retry</button>
