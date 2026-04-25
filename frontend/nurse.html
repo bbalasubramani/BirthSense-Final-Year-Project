@@ -165,14 +165,8 @@
 
 async function verifySession() {
   try {
-    // API_BASE_URL is now available from script.js
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
-      method: 'GET',
-      credentials: 'include', // crucial for sending JWT cookie
-    });
-
-    if (!res.ok) throw new Error('Session invalid');
-    const user = await res.json();
+    const user = await apiCall('/auth/me', 'GET');
+    if (!user) throw new Error('Session invalid');
     console.log('Authenticated as:', user.name, user.role);
 
     // Restrict page access by role
@@ -186,18 +180,33 @@ async function verifySession() {
     initNurseDashboard();
 
   } catch (err) {
-    console.warn('Session expired or not authorized. Redirecting to login...');
-    window.location.href = 'login.html';
+    console.warn('Session check failed:', err);
+    const isNetworkError = err.message === 'Failed to fetch' || err.message.includes('NetworkError');
+
+    if (isNetworkError) {
+      document.body.innerHTML = `
+        <div style="text-align:center;padding:50px;font-family:sans-serif;">
+          <h1 style="color:red;">⚠️ Connection Error</h1>
+          <p>Cannot connect to server at <strong>${API_BASE_URL}</strong>.</p>
+          <ul style="display:inline-block;text-align:left;">
+            <li>The backend server is running</li>
+            <li>If deployed, backend URL in <code>config.js</code> is valid and awake</li>
+            <li>If local, open frontend from <code>http://localhost:5000</code></li>
+          </ul>
+          <br><button onclick="window.location.reload()">Retry</button>
+        </div>
+      `;
+    } else {
+      console.warn('Session expired or not authorized. Redirecting to login...');
+      window.location.href = 'login.html';
+    }
   }
 }
 
 // 🔒 Logout (clears cookie on server)
 async function handleLogout() {
   try {
-    await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    });
+    await apiCall('/auth/logout', 'POST');
   } catch (err) {
     console.error('Logout error:', err);
   }
