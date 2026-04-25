@@ -20,4 +20,10 @@ const apiOverride = window.BIRTHSENSE_API_URL;
 
   window.API_BASE_URL = resolvedBase.replace(/\/$/, '');
   window.API_BACKUP_BASE_URLS = hostedApiCandidates.map((url) => url.replace(/\/$/, ''));
+  window.getApiBaseUrls = () => {
+    const all = [window.API_BASE_URL, ...(window.API_BACKUP_BASE_URLS || [])]
+      .map((url) => String(url || '').replace(/\/$/, ''))
+      .filter(Boolean);
+    return [...new Set(all)];
+  };
 })();
