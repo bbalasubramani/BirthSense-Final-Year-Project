@@ -93,6 +93,9 @@ body::before {
     <script src="config.js"></script>
     <script>
 const API_BASE_URL = window.API_BASE_URL;
+const API_BASE_URLS = typeof window.getApiBaseUrls === 'function'
+  ? window.getApiBaseUrls()
+  : [API_BASE_URL];
 
 async function handleLogin(event) {
   event.preventDefault();
@@ -106,15 +109,33 @@ async function handleLogin(event) {
     return;
   }
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-      credentials: 'include'
-    });
 
-    const data = await response.json();
+        let response = null;
+    let data = {};
+    let finalError = null;
+
+    for (const baseUrl of API_BASE_URLS) {
+      try {
+        response = await fetch(`${baseUrl}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include'
+        });
+
+        data = await response.json().catch(() => ({}));
+        if (response.ok) break;
+        if (response.status >= 500 && baseUrl !== API_BASE_URLS[API_BASE_URLS.length - 1]) {
+          continue;
+        }
+        break;
+      } catch (networkError) {
+        finalError = networkError;
+        if (baseUrl === API_BASE_URLS[API_BASE_URLS.length - 1]) throw networkError;
+      }
+    }
+
+    if (!response) throw finalError || new Error('Server unreachable');
     if (!response.ok) throw new Error(data.message || 'Login failed');
 
     const role = data.role?.toLowerCase();
