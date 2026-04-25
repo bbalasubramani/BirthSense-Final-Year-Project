@@ -49,12 +49,12 @@ async function apiCall(endpoint, method = 'GET', body = null) {
         msg.style.color = 'red';
       }
     }
-    throw err;
+    if (!mayRetry) throw err;
   }
 }
 
   throw lastError || new Error('API Error');
-
+}
 /**
  * ✅ Dedicated login function with credentials included.
  * Example use: login.html → handleLogin()
