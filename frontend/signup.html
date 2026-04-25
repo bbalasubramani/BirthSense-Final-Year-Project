@@ -88,6 +88,9 @@ body::before {
     <script src="config.js"></script>
     <script>
         const API_BASE_URL = window.API_BASE_URL;
+        const API_BASE_URLS = typeof window.getApiBaseUrls === 'function'
+            ? window.getApiBaseUrls()
+            : [API_BASE_URL];
 
         async function handleSignup(event) {
             event.preventDefault(); 
@@ -112,23 +115,40 @@ body::before {
            
 
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ name, email, password, role })
-                });
+                let response = null;
+                let data = {};
+                let finalError = null;
 
-                const data = await response.json();
+                for (const baseUrl of API_BASE_URLS) {
+                    try {
+                        response = await fetch(`${baseUrl}/auth/signup`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ name, email, password, role })
+                        });
+                        data = await response.json().catch(() => ({}));
 
-                if (response.ok) {
-                    // Signup successful, redirect to login
-                    alert('Signup successful! You can now log in.'); // Use modal later
-                    window.location.href = 'login.html';
-                } else {
-                    errorElement.textContent = data.message || 'Signup failed.';
+                        if (response.ok) break;
+                        if (response.status >= 500 && baseUrl !== API_BASE_URLS[API_BASE_URLS.length - 1]) {
+                            continue;
+                        }
+                        break;
+                    } catch (networkError) {
+                        finalError = networkError;
+                        if (baseUrl === API_BASE_URLS[API_BASE_URLS.length - 1]) throw networkError;
+                    }
                 }
 
+                if (response?.ok) {
+                    // Signup successful, redirect to login
+                    alert('Signup successful! You can now log in.');
+                    window.location.href = 'login.html';
+                } else if (response) {
+                    errorElement.textContent = data.message || 'Signup failed.';
+                    } else {
+                    throw finalError || new Error('Server unreachable');
+                }
             } catch (error) {
                 console.error('Signup error:', error);
                 errorElement.textContent = 'Network error or server unreachable.';
