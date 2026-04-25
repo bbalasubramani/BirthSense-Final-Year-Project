@@ -2,7 +2,7 @@ services:
   - type: web
     name: birthsense-backend
     env: node
-    buildCommand: cd backend && npm install
+    buildCommand: cd backend && npm install && python3 -m pip install -r requirements.txt
     startCommand: cd backend && npm start
     envVars:
       - key: MONGO_URI
@@ -10,6 +10,8 @@ services:
       - key: JWT_SECRET
         sync: false
         key: FRONTEND_ORIGIN
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
         sync: false
       - key: PORT
         value: 10000
