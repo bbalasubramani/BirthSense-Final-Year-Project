@@ -56,6 +56,10 @@ allowedOrigins.add(normalizeOrigin('http://127.0.0.1:5500'));
 
 const corsOptions = {
   origin: (origin, callback) => {
+    const allowAllCors = (process.env.CORS_ALLOW_ALL || '').toLowerCase() === 'true';
+
+    if (allowAllCors) return callback(null, true);
+
     // Allow non-browser clients/tools that do not send Origin
     if (!origin) return callback(null, true);
 
@@ -73,11 +77,16 @@ const corsOptions = {
       // fall through to rejection
     }
 
+    // If no explicit allowed origins are configured, fail open to avoid
+    // production lockouts caused by missing environment variables.
+    if (allowedOrigins.size === 0) return callback(null, true);
+    
     return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
