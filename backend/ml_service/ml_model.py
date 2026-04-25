@@ -128,6 +128,32 @@ def calculate_clinical_risk_score(input_data: Dict[str, Any]):
     else:
         return "Low"
 
+def build_fallback_prediction(input_data: Dict[str, Any]):
+    """
+    Returns a safe heuristic prediction when serialized model artifacts
+    are unavailable in the runtime environment.
+    """
+    clinical_risk = calculate_clinical_risk_score(input_data)
+
+    if clinical_risk == "High":
+        return {
+            "prediction_result": "C-Section",
+            "confidence_score": 72.0,
+            "model_used": "Fallback_Clinical_Heuristic (Model Artifact Missing)"
+        }
+    if clinical_risk == "Medium":
+        return {
+            "prediction_result": "Assisted",
+            "confidence_score": 58.0,
+            "model_used": "Fallback_Clinical_Heuristic (Model Artifact Missing)"
+        }
+
+    return {
+        "prediction_result": "Vaginal",
+        "confidence_score": 62.0,
+        "model_used": "Fallback_Clinical_Heuristic (Model Artifact Missing)"
+    }
+
 def predict_delivery_type_merged(input_data: Dict[str, Any]):
     # --- STEP 1: Clinical Pre-Filtering ---
     pre_filter_result = apply_clinical_pre_filter(input_data)
@@ -137,7 +163,7 @@ def predict_delivery_type_merged(input_data: Dict[str, Any]):
     # Load models only if needed
     components = load_models_lazy()
     if components is None:
-        raise RuntimeError("Prediction models failed to load.")
+        return build_fallback_prediction(input_data)
         
     model_A = components['model_A']
     ft_model = components['ft_model']
