@@ -3,10 +3,10 @@
 
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
   const isRenderHosted = hostname.endsWith('.onrender.com');
-const apiOverride = window.BIRTHSENSE_API_URL;
+  const apiOverride = window.BIRTHSENSE_API_URL;
   const hostedApiCandidates = [
-    'https://birthsense-backend.onrender.com/api',
-    'https://birthsense-final-year-project-1.onrender.com/api'
+    'https://birthsense-final-year-project-1.onrender.com/api',
+    'https://birthsense-backend.onrender.com/api'
   ];
  
   // 1) Local dev uses local API
