@@ -1,5 +1,5 @@
 /* Global Styles */
-body {
+ody.dashboard-page {
     background-color: #f0f4f8;
     margin: 0;
     font-family: 'Poppins', sans-serif; /* Using Poppins for modern look */
@@ -9,14 +9,14 @@ body {
     min-height: 100vh;
 }
 
-h1, h2 {
+body.dashboard-page h1, body.dashboard-page h2 {
     text-align: center;
     color: #2c3e50;
     margin-top: 0;
     margin-bottom: 20px;
 }
 
-h1 {
+body.dashboard-page h1 {
     font-family: "Poppins",sans-serif;
     font-weight: 700;
     font-style: normal;
@@ -24,7 +24,7 @@ h1 {
     color: #3f55e5; /* Slightly larger for main title */
 }
 
-h2 {
+body.dashboard-page h2 {
     font-size: 1.8rem;
     color: #2c3e50; /* Highlight section titles */
 }
@@ -119,7 +119,7 @@ h2 {
     display: none; /* Hidden by default */
 }
 
-label {
+body.dashboard-page label {
     display: flex;
     justify-content: flex-start; /* Align labels to start */
     align-items: center;
@@ -133,7 +133,7 @@ label {
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-label:hover {
+body.dashboard-page label:hover {
     background-color: #d1dcfc;
 }
 
@@ -149,7 +149,7 @@ label:hover {
     display: inline-block; /* Show tick when active */
 }
 
-input, select {
+body.dashboard-page input, body.dashboard-page select {
     width: calc(100% - 20px); /* Adjust width to account for padding */
     padding: 10px;
     border: 1px solid #ced4da;
@@ -159,7 +159,7 @@ input, select {
     box-sizing: border-box; /* Include padding in width */
 }
 
-input:focus, select:focus {
+body.dashboard-page input:focus, body.dashboard-page select:focus {
     border-color: #3f55e5; /* Highlight on focus */
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(63, 85, 229, 0.25);
