@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
  * @desc Trigger ML prediction for a specific patient (Doctor, Admin)
  */
 const runPrediction = asyncHandler(async (req, res) => {
-    const patientId = req.params.id;
+  const patientId = req.params.id;
   const patient = await PatientData.findById(patientId);
 
   if (!patient) {
@@ -23,7 +23,14 @@ const runPrediction = asyncHandler(async (req, res) => {
     throw new Error('Patient data not found');
   }
 
-  const resolvedAge = patient.age ?? patient.maternal_age;
+  const resolvedAge = Number.isFinite(Number(patient.age))
+    ? Number(patient.age)
+    : (Number.isFinite(Number(patient.maternal_age)) ? Number(patient.maternal_age) : null);
+
+  if (resolvedAge === null) {
+    res.status(400);
+    throw new Error('Patient record is missing maternal age. Please update the record before prediction.');
+  }
     
   const mlFeatures = {
     // Basic Maternal Info
@@ -125,6 +132,7 @@ const runPrediction = asyncHandler(async (req, res) => {
     patientId,
     {
       $set: {
+        age: resolvedAge,
         predictionResult: finalPredictionResult,
         confidenceScore: confidence,
       },
