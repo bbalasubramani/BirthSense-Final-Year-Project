@@ -23,9 +23,11 @@ const runPrediction = asyncHandler(async (req, res) => {
     throw new Error('Patient data not found');
   }
 
+  const resolvedAge = patient.age ?? patient.maternal_age;
+    
   const mlFeatures = {
     // Basic Maternal Info
-    age: patient.age,
+    age: resolvedAge,
     height: patient.height,
     weight: patient.weight,
     bmi: patient.bmi,
@@ -117,10 +119,21 @@ const runPrediction = asyncHandler(async (req, res) => {
     finalPredictionResult = 'Assisted';
   }
 
-  patient.predictionResult = finalPredictionResult;
-  patient.confidenceScore = confidence;
+  // Use direct update to avoid full-document validation on legacy records that may
+  // be missing newer required fields (or historical field names like maternal_age).
+  const updatedPatient = await PatientData.findByIdAndUpdate(
+    patientId,
+    {
+      $set: {
+        predictionResult: finalPredictionResult,
+        confidenceScore: confidence,
+      },
+    },
+    {
+      new: true,
+    }
+  );
 
-  const updatedPatient = await patient.save();
   res.json(updatedPatient);
 });
 
