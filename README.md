@@ -77,7 +77,7 @@ When you open the live app, you can enter maternal health parameters and instant
 
 ## 🖼️ Screenshots
 
-![BirthSense Home Screen](./screenshots/Index page.jpg)
+![BirthSense Home Screen](./screenshots/Index_page.jpg)
 ![BirthSense Login Screen](./screenshots/Login.jpg)
 ![BirthSense Prediction Output](./screenshots/Result.jpg)
 
