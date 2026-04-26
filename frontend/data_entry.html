@@ -227,6 +227,111 @@
             padding: 0;
         }
 
+        .disapproved-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 15px 0 20px;
+        }
+
+        .stats-wrap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+
+        .stat-card {
+            background: #f2f6ff;
+            border: 1px solid #d9e5ff;
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .stat-card small {
+            display: block;
+            color: #5b6472;
+            font-size: 0.78rem;
+        }
+
+        .stat-card strong {
+            color: #2f3bb4;
+            font-size: 1.25rem;
+        }
+
+        .disapproved-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #refreshDisapprovedBtn {
+            background-color: #3f55e5;
+            color: #fff;
+        }
+
+        #clearDisapprovedSearchBtn {
+            background-color: #f0f1f5;
+            color: #2f3542;
+        }
+
+        .disapproved-search {
+            width: 100%;
+            max-width: 390px;
+        }
+
+        .disapproved-search input {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .disapproved-table-wrap {
+            overflow-x: auto;
+            border: 1px solid #ebedf5;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .disapproved-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 720px;
+        }
+
+        .disapproved-table th,
+        .disapproved-table td {
+            border-bottom: 1px solid #f0f2f8;
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .disapproved-table th {
+            background: #f8faff;
+            color: #3f55e5;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .disapproved-empty {
+            text-align: center;
+            color: #7a8597;
+            padding: 20px 10px;
+        }
+
         .disapproved-item {
             background-color: #ffe0e0;
             border: 1px solid var(--danger-color);
@@ -335,9 +440,47 @@
             <div id="disapprovedList" class="content-section" style="display:none;">
                 <h2>Disapproved Patient Data</h2>
                 <p>Select a record below to review the nurse's comments, edit the data, and resubmit.</p>
-                <ul class="disapproved-list" id="disapprovedDataList">
-                    <li>No disapproved records found.</li>
-                </ul>
+                <div class="disapproved-toolbar">
+                    <div class="stats-wrap">
+                        <div class="stat-card">
+                            <small>Total disapproved</small>
+                            <strong id="disapprovedTotalCount">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <small>Unique patients</small>
+                            <strong id="disapprovedUniqueCount">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <small>Showing</small>
+                            <strong id="disapprovedVisibleCount">0</strong>
+                        </div>
+                    </div>
+                    <div class="disapproved-actions">
+                        <button id="refreshDisapprovedBtn" class="action-btn" type="button">Refresh</button>
+                        <button id="clearDisapprovedSearchBtn" class="action-btn" type="button">Clear Search</button>
+                    </div>
+                </div>
+                <div class="disapproved-search">
+                    <input id="disapprovedSearchInput" type="text"
+                        placeholder="Search by Patient ID, name, or review reason..." />
+                </div>
+                <div class="disapproved-table-wrap">
+                    <table class="disapproved-table">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Contact</th>
+                                <th>Review Reason</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="disapprovedTableBody">
+                            <tr>
+                                <td colspan="4" class="disapproved-empty">No disapproved records found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                 <div id="loadingDisapproved" style="text-align: center; margin-top: 20px;">Loading...</div>
             </div>
             <div id="patientIdentity" class="content-section">
@@ -588,6 +731,7 @@
         // --- State ---
         let isEditMode = false;
         let allDisapprovedData = [];
+        let filteredDisapprovedData = [];
 
         // --- API Helper ---
         async function apiCall(url, method = 'GET', data = null) {
@@ -686,35 +830,73 @@
         }
 
         // --- Disapproved Data Handling ---
+        function updateDisapprovedStats() {
+            const total = allDisapprovedData.length;
+            const visible = filteredDisapprovedData.length;
+            const unique = new Set(allDisapprovedData.map((patient) => patient.patientId)).size;
+            document.getElementById('disapprovedTotalCount').textContent = total;
+            document.getElementById('disapprovedVisibleCount').textContent = visible;
+            document.getElementById('disapprovedUniqueCount').textContent = unique;
+        }
+
+        function renderDisapprovedTable(dataRows) {
+            const tableBodyEl = document.getElementById('disapprovedTableBody');
+            if (!tableBodyEl) return;
+
+            if (!dataRows.length) {
+                tableBodyEl.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="disapproved-empty">No matching disapproved records.</td>
+                    </tr>`;
+                updateDisapprovedStats();
+                return;
+            }
+
+            tableBodyEl.innerHTML = dataRows.map(p => `
+                <tr>
+                    <td>
+                        <strong>${p.patientName || 'Unknown'} (${p.patientId || 'N/A'})</strong><br/>
+                        <small>Age: ${p.age ?? 'N/A'} | Gestation: ${p.gestational_age ?? 'N/A'} weeks</small>
+                    </td>
+                    <td>
+                        <div>${p.email || 'N/A'}</div>
+                        <small>${p.phone_number || 'N/A'}</small>
+                    </td>
+                    <td>${p.reviewNote || 'No reason provided.'}</td>
+                    <td><button type="button" class="action-btn" id="edit-btn-${p._id}"
+                        onclick="loadPatientForEdit('${p._id}')">Edit & Resubmit</button></td>
+                </tr>`).join('');
+
+            updateDisapprovedStats();
+        }
+
+        function applyDisapprovedSearch() {
+            const searchText = (document.getElementById('disapprovedSearchInput')?.value || '').toLowerCase().trim();
+            filteredDisapprovedData = allDisapprovedData.filter((patient) => {
+                const searchBlob = `${patient.patientId || ''} ${patient.patientName || ''} ${patient.reviewNote || ''}`.toLowerCase();
+                return searchBlob.includes(searchText);
+            });
+            renderDisapprovedTable(filteredDisapprovedData);
+        }
+        
         async function loadDisapprovedData() {
-            const listEl = document.getElementById('disapprovedDataList');
             const loadingEl = document.getElementById('loadingDisapproved');
             loadingEl.style.display = 'block';
-            listEl.innerHTML = '';
+            const tableBodyEl = document.getElementById('disapprovedTableBody');
+            tableBodyEl.innerHTML = '';
 
             try {
                 const data = await apiCall('/api/data/patients');
                 allDisapprovedData = data.filter(p => p.reviewStatus === 'DISAPPROVED');
+                filteredDisapprovedData = [...allDisapprovedData];
                 loadingEl.style.display = 'none';
 
-                if (allDisapprovedData.length === 0) {
-                    listEl.innerHTML = '<li>No disapproved records found.</li>';
-                    return;
-                }
-
-                listEl.innerHTML = allDisapprovedData.map(p => `
-        <li class="disapproved-item">
-            <div class="disapproved-item-info">
-                <strong>${p.patientName} (${p.patientId})</strong>
-                <div class="disapproved-item-reason">Reason: ${p.reviewNote || 'No reason provided.'}</div>
-            </div>
-            <button onclick="loadPatientForEdit('${p._id}')">Edit & Resubmit</button>
-        </li>
-        `).join('');
+                renderDisapprovedTable(filteredDisapprovedData);
 
             } catch (error) {
                 loadingEl.style.display = 'none';
-                listEl.innerHTML = `<li>Error loading data: ${error.message}</li>`;
+                tableBodyEl.innerHTML = `<tr><td colspan="4" class="disapproved-empty">Error loading data: ${error.message}</td></tr>`;
+                updateDisapprovedStats();
             }
         }
 
@@ -810,8 +992,11 @@
                     statusElement.style.color = 'green';
 
                     allDisapprovedData = allDisapprovedData.filter(p => p._id !== mongoId);
-                    const listEl = document.getElementById('disapprovedDataList');
-                    if (listEl) listEl.innerHTML = '<li>Refreshing...</li>';
+                    filteredDisapprovedData = filteredDisapprovedData.filter(p => p._id !== mongoId);
+                    const tableBodyEl = document.getElementById('disapprovedTableBody');
+                    if (tableBodyEl) {
+                        tableBodyEl.innerHTML = `<tr><td colspan="4" class="disapproved-empty">Refreshing...</td></tr>`;
+                    }
                     await loadDisapprovedData();
 
                     isEditMode = false;
@@ -852,6 +1037,13 @@
                     e.preventDefault();
                     switchView(item.getAttribute('data-target'));
                 });
+            });
+            document.getElementById('disapprovedSearchInput')?.addEventListener('input', applyDisapprovedSearch);
+            document.getElementById('refreshDisapprovedBtn')?.addEventListener('click', loadDisapprovedData);
+            document.getElementById('clearDisapprovedSearchBtn')?.addEventListener('click', () => {
+                const searchInput = document.getElementById('disapprovedSearchInput');
+                if (searchInput) searchInput.value = '';
+                applyDisapprovedSearch();
             });
             switchView('patientIdentity');
         });
