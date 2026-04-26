@@ -412,6 +412,7 @@
         function renderPatientTables(patients) {
             const readyTableBody = document.getElementById('readyTableBody');
             const predictedTableBody = document.getElementById('predictedTableBody');
+            const safeAge = (patient) => patient.age ?? patient.maternal_age ?? 'N/A';
 
             const readyPatients = patients.filter(p => p.predictionResult === 'Pending');
             const predictedPatients = patients.filter(p => p.predictionResult !== 'Pending');
@@ -426,7 +427,7 @@
                         <tr>
                             <td>${patient.patientId}</td>
                             <td>${patient.patientName}</td>
-                            <td>${patient.age}</td>
+                            <td>${safeAge(patient)}</td>
                             <td>${(patient.bmi || 0).toFixed(2)}</td>
                             <td>${patient.enteredBy?.name || 'N/A'}</td>
                             <td>${predictionStatus}</td>
@@ -450,7 +451,7 @@
                         <tr>
                             <td>${patient.patientId}</td>
                             <td>${patient.patientName}</td>
-                            <td>${patient.age}</td>
+                            <td>${safeAge(patient)}</td>
                             <td><span class="prediction-done ${resultClass}">${patient.predictionResult}</span></td>
                             <td>${(patient.confidenceScore || 0).toFixed(1)}%</td>
                             <td>${predictionDate}</td>
@@ -493,8 +494,8 @@
             document.getElementById('patientDetailTitle').textContent = `Patient: ${patient.patientName}`;
             document.getElementById('detail_patientId').value = patient.patientId;
             document.getElementById('detail_patientName').value = patient.patientName;
-            document.getElementById('detail_age').value = patient.age;
-            document.getElementById('detail_bp_systolic').value = patient.bloodPressure;
+            document.getElementById('detail_age').value = patient.age ?? patient.maternal_age ?? '';
+            document.getElementById('detail_bp_systolic').value = patient.bp_systolic ?? patient.bloodPressure ?? '';
             document.getElementById('detail_glucoseLevel').value = patient.glucoseLevel;
             document.getElementById('detail_bmi').value = patient.bmi.toFixed(2);
             // Setting dummy height/weight to make BMI calculation work if fields are edited
