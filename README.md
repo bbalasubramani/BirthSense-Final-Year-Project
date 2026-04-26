@@ -77,18 +77,8 @@ When you open the live app, you can enter maternal health parameters and instant
 
 ## 🖼️ Screenshots
 
-> Add screenshots/GIFs here to showcase:
-> 1) Input form
-> 2) Prediction result view
-> 3) Risk suggestions panel
-> 4) Mobile responsiveness
-
-Example placeholder:
-
-```md
-![BirthSense Input Screen](./screenshots/input-screen.png)
-![BirthSense Prediction Output](./screenshots/prediction-output.png)
-```
+![BirthSense Login Screen](./screenshots/Login.jpg)
+![BirthSense Prediction Output](./screenshots/Result.jpg)
 
 ---
 
