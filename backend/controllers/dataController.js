@@ -183,30 +183,36 @@ const updatePatientData = asyncHandler(async (req, res) => {
     throw new Error('Cannot update unapproved patient data.');
   }
 
+  const toOptionalNumber = (value) => {
+    if (value === null || value === undefined || value === '') return undefined;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  };
+  
   // Apply field updates
   Object.assign(patient, {
     patientName: req.body.patientName ?? patient.patientName,
     email: req.body.email ?? patient.email,
     phone_number: req.body.phone_number ?? patient.phone_number,
-    age: req.body.age ?? patient.age,
-    height: req.body.height ?? patient.height,
-    weight: req.body.weight ?? patient.weight,
-    bmi: req.body.bmi ?? patient.bmi,
-    gravidity: req.body.gravidity ?? patient.gravidity,
-    parity: req.body.parity ?? patient.parity,
+    age: toOptionalNumber(req.body.age) ?? patient.age,
+    height: toOptionalNumber(req.body.height) ?? patient.height,
+    weight: toOptionalNumber(req.body.weight) ?? patient.weight,
+    bmi: toOptionalNumber(req.body.bmi) ?? patient.bmi,
+    gravidity: toOptionalNumber(req.body.gravidity) ?? patient.gravidity,
+    parity: toOptionalNumber(req.body.parity) ?? patient.parity,
     previous_cesarean: req.body.previous_cesarean ?? patient.previous_cesarean,
     previous_vaginal_birth: req.body.previous_vaginal_birth ?? patient.previous_vaginal_birth,
     previous_assisted: req.body.previous_assisted ?? patient.previous_assisted,
-    gestational_age: req.body.gestational_age ?? patient.gestational_age,
+    gestational_age: toOptionalNumber(req.body.gestational_age) ?? patient.gestational_age,
     gestational_diabetes: req.body.gestational_diabetes ?? patient.gestational_diabetes,
     hypertension: req.body.hypertension ?? patient.hypertension,
-    estimated_fetal_weight: req.body.estimated_fetal_weight ?? patient.estimated_fetal_weight,
-    amniotic_fluid_index: req.body.amniotic_fluid_index ?? patient.amniotic_fluid_index,
-    bishop_score: req.body.bishop_score ?? patient.bishop_score,
-    bp_systolic: req.body.bp_systolic ?? patient.bp_systolic,
-    bp_diastolic: req.body.bp_diastolic ?? patient.bp_diastolic,
-    bloodPressure: req.body.bloodPressure ?? patient.bloodPressure,
-    glucoseLevel: req.body.glucoseLevel ?? patient.glucoseLevel,
+    estimated_fetal_weight: toOptionalNumber(req.body.estimated_fetal_weight) ?? patient.estimated_fetal_weight,
+    amniotic_fluid_index: toOptionalNumber(req.body.amniotic_fluid_index) ?? patient.amniotic_fluid_index,
+    bishop_score: toOptionalNumber(req.body.bishop_score) ?? patient.bishop_score,
+    bp_systolic: toOptionalNumber(req.body.bp_systolic) ?? patient.bp_systolic,
+    bp_diastolic: toOptionalNumber(req.body.bp_diastolic) ?? patient.bp_diastolic,
+    bloodPressure: toOptionalNumber(req.body.bloodPressure) ?? patient.bloodPressure,
+    glucoseLevel: toOptionalNumber(req.body.glucoseLevel) ?? patient.glucoseLevel,
     // 💡 FIX: Include new fields in the update logic
     fetal_presentation: req.body.fetal_presentation ?? patient.fetal_presentation,
     induction_of_labor: req.body.induction_of_labor ?? patient.induction_of_labor,
