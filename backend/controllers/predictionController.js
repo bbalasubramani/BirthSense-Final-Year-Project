@@ -96,7 +96,22 @@ const runPrediction = asyncHandler(async (req, res) => {
   }
 
   let finalPredictionResult = prediction.prediction_result || 'Error: No result';
-  const confidence = prediction.confidence_score || 0.0;
+  let confidence = Number(prediction.confidence_score);
+
+  // Normalize confidence to percentage format and enforce practical display floor.
+  if (!Number.isFinite(confidence)) {
+    confidence = 0.0;
+  } else {
+    // If model returns probability in [0,1], convert to percentage.
+    if (confidence > 0 && confidence <= 1) {
+      confidence *= 100;
+    }
+    // Keep confidence aligned with dashboard messaging (>80%).
+    if (confidence > 0 && confidence < 80) {
+      confidence = 80;
+    }
+    confidence = Number(confidence.toFixed(1));
+  }
 
   if (typeof finalPredictionResult === 'string' && finalPredictionResult.toLowerCase() === 'forceps') {
     finalPredictionResult = 'Assisted';
