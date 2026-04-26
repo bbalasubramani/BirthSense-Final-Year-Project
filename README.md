@@ -201,8 +201,8 @@ Frontend typically runs at: `http://localhost:3000/`
 
 ## 🤝 Connect
 
-- **GitHub:** https://github.com/<your-username>
-- **LinkedIn:** https://www.linkedin.com/in/<your-linkedin-username>/
+- **GitHub:** https://github.com/bbalasubramani
+- **LinkedIn:** https://www.linkedin.com/in/balasubramani-dev/
 
 If you are a recruiter or engineer reviewing this project, feel free to explore the live demo and share feedback.
 
