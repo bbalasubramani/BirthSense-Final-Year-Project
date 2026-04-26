@@ -15,6 +15,12 @@ const patientDataSchema = mongoose.Schema({
         type: String,
         required: [true, "Patient Name is required."],
     },
+    age: {
+        type: Number,
+        required: true,
+        min: [15, "Maternal Age should be between 15 and 50 years."],
+        max: [50, "Maternal Age should be between 15 and 50 years."],
+    },
     height: {
         type: Number,
         required: true,
