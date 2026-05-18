@@ -1,6 +1,6 @@
 # 🤰 BirthSense
 
-**Machine learning-powered maternal health risk prediction platform built as a full stack web application with a production-deployed REST API.**
+**Machine learning-powered childbirth mode prediction platform built as a full stack web application with a production-deployed REST API.**
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-birthsense.netlify.app-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://birthsense.netlify.app)
 
@@ -20,17 +20,17 @@
 
 ## 🩺 Problem Statement
 
-Maternal health complications remain a major challenge in many developing regions, where access to specialist care and continuous monitoring can be limited. Early machine learning-based risk screening can support healthcare workers by flagging potentially high-risk pregnancies faster. BirthSense is designed to provide quick, interpretable risk predictions that can help prioritize timely intervention, especially in resource-constrained settings including India.
+Planning for childbirth remains a major challenge in many developing regions, where access to specialist care, operating theatre availability, and continuous monitoring can be limited. Early machine learning-based delivery mode prediction can support healthcare workers by indicating whether a patient is more likely to require a Normal delivery or Caesarean (C-Section) delivery. BirthSense is designed to provide quick, interpretable delivery mode predictions that can help healthcare teams plan in advance, especially in resource-constrained settings including India.
 
 ---
 
 ## ✨ Features
 
-- Predicts maternal pregnancy risk levels: **Low Risk / Medium Risk / High Risk**.
-- Uses a trained **Random Forest** model on maternal health indicators.
+- Predicts childbirth delivery mode: **Normal Delivery / Caesarean Delivery**.
+- Uses a trained **Random Forest** model on patient obstetric and health indicators.
 - Accepts key inputs: **age, blood pressure, blood glucose, BMI, heart rate**.
-- Returns a **risk category**, **confidence score**, and **actionable health suggestions**.
-- Clean, user-friendly web interface for quick risk assessment workflows.
+- Returns a **delivery mode prediction**, **confidence score**, and **actionable planning suggestions**.
+- Clean, user-friendly web interface for quick delivery planning workflows.
 - Full stack architecture with a deployed frontend and production API.
 
 ---
@@ -41,9 +41,9 @@ Maternal health complications remain a major challenge in many developing region
 |---|---|---|
 | Frontend | React.js | User interface for data input and prediction results |
 | Backend | Django + Django REST Framework | REST API for prediction requests and responses |
-| Machine Learning | scikit-learn (Random Forest) | Classification of maternal health risk |
+| Machine Learning | scikit-learn (Random Forest) | Classification of childbirth delivery mode |
 | Data Science | pandas, NumPy | Data preprocessing and model workflow |
-| Dataset | UCI Maternal Health Risk Dataset | Training and evaluation data |
+| Dataset | Patient obstetric and health indicators dataset | Training and evaluation data |
 | Database (Dev) | SQLite | Local development database |
 | Database (Prod) | PostgreSQL (Render) | Production persistence |
 | Deployment (Frontend) | Netlify | Hosted live web client |
@@ -60,7 +60,7 @@ flowchart LR
     B --> C[Django REST API\nRender]
     C --> D[Preprocessing + Random Forest Model\nscikit-learn]
     D --> C
-    C --> E[Risk Class + Confidence + Suggestions]
+    C --> E[Delivery Mode + Confidence + Suggestions]
     E --> B
 ```
 
@@ -71,7 +71,7 @@ flowchart LR
 - **Frontend:** https://birthsense.netlify.app
 - **Backend API:** _Add your Render API URL here_ (example: `https://your-api-name.onrender.com/api/predict/`)
 
-When you open the live app, you can enter maternal health parameters and instantly receive a predicted risk class with confidence and recommendation-oriented output.
+When you open the live app, you can enter patient health parameters and instantly receive a predicted delivery mode with confidence and recommendation-oriented output.
 
 ---
 
@@ -86,7 +86,7 @@ When you open the live app, you can enter maternal health parameters and instant
 ## ⚙️ How It Works
 
 1. **User Input Collection**  
-   The frontend collects maternal health values (age, blood pressure, blood glucose, BMI, heart rate).
+   The frontend collects patient health values (age, blood pressure, blood glucose, BMI, heart rate).
 
 2. **Request to REST API**  
    The React client sends a structured JSON payload to the Django REST API endpoint.
@@ -95,10 +95,10 @@ When you open the live app, you can enter maternal health parameters and instant
    The backend validates and preprocesses incoming values to match model expectations.
 
 4. **Random Forest Inference**  
-   The trained scikit-learn Random Forest classifier predicts one of three classes.
+   The trained scikit-learn Random Forest classifier predicts one of two delivery mode classes.
 
 5. **Post-processing & Explanation Layer**  
-   The API maps output into readable labels (Low/Medium/High), includes confidence score, and appends actionable suggestions.
+   The API maps output into readable delivery mode labels (Normal/Caesarean), includes confidence score, and appends actionable suggestions.
 
 6. **Frontend Display**  
    The app renders prediction results in a clean, clinician-friendly format.
@@ -175,8 +175,8 @@ Frontend typically runs at: `http://localhost:3000/`
 ## 🧠 Model Details
 
 - **Algorithm:** Random Forest Classifier (scikit-learn)
-- **Dataset:** UCI Maternal Health Risk Dataset
-- **Prediction Classes:** Low Risk, Medium Risk, High Risk
+- **Dataset:** Dataset containing patient obstetric and health indicators for delivery mode classification
+- **Prediction Classes:** Normal Delivery, Caesarean Delivery
 - **Model Accuracy:** **[Add your evaluated test accuracy here — e.g., 85.0%]**
 
 ---
